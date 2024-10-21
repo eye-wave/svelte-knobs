@@ -1,9 +1,9 @@
 {
 	"name": "svelte-knobs",
 	"version": "0.0.1",
-  "repository": "git@github.com:eye-wave/svelte-knobs.git",
+	"repository": "git@github.com:eye-wave/svelte-knobs.git",
 	"author": "_eyewave <89079979+eye-wave@users.noreply.github.com>",
-  "license": "MIT",
+	"license": "MIT",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",

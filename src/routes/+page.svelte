@@ -1,7 +1,5 @@
 <script lang="ts">
 	// remove next
-	import './style.css';
-	// remove next
 	import CopyPaste from './CopyPaste.svelte';
 	import {
 		createEnumParam,
@@ -37,26 +35,38 @@
 		<h2>Basic</h2>
 		<Knob param={basicParam} bind:value={basicValue} label="Volume" unit="%" />
 
-		<p>Basic knob with linear param.</p>
+		<p>A basic knob with a linear parameter.</p>
 	</div>
 
 	<div class="example">
 		<h2>Logarithmic</h2>
 		<Knob param={logParam} bind:value={logValue} label="Frequency" unit="hz" />
+
+		<p>A knob with logarithmic scaling (default base is 10).</p>
 	</div>
 
 	<div class="example">
 		<h2>Smoothness</h2>
 
 		<h3>Smooth</h3>
-		<Knob param={smoothParam} bind:value={smoothValue} label="Ammount" unit="%" stiffness={0.1} />
+		<Knob param={smoothParam} bind:value={smoothValue} label="Amount" unit="%" stiffness={0.1} />
 
 		<h3>Stiff</h3>
-		<Knob param={smoothParam} bind:value={smoothValue} label="Ammount" unit="%" stiffness={1} />
+		<Knob param={smoothParam} bind:value={smoothValue} label="Amount" unit="%" stiffness={1} />
+
+		<p>
+			Knobs use <code>spring</code> function from <code>svelte/motion</code> under the hood,
+			allowing you to adjust smoothness by modifying the <code>stiffness</code> property on the
+			<code>{'<Knob />'}</code> component.
+		</p>
+		<p>
+			Additionally, due to how Svelte's binding works, you can use the same parameter and value for
+			multiple knobs simultaneously.
+		</p>
 	</div>
 
 	<div class="example">
-		<h2>Snap points</h2>
+		<h2>Snap Points</h2>
 		<Knob
 			param={snapParam}
 			bind:value={snapValue}
@@ -65,13 +75,30 @@
 			label="Release"
 			unit="ms"
 		/>
+
+		<p>
+			You can define specific points where the knob should snap and control the snapping strength by
+			adjusting the <code>snapThreshold</code> property.
+		</p>
+		<p><i>Note: This works only with </i><code>FloatParam</code><i> values.</i></p>
 	</div>
 
 	<div class="example">
-		<h2>Enum param</h2>
+		<h2>Enum Parameter</h2>
 		<Knob param={enumParam} bind:value={enumValue} label="Fruit" />
-		<Knob param={filterParam} bind:value={filterValue} label="Filter type" />
-		<Knob param={oscParam} bind:value={oscValue} label="Oscillator type" />
+		<Knob param={filterParam} bind:value={filterValue} label="Filter Type" />
+		<Knob param={oscParam} bind:value={oscValue} label="Oscillator Type" />
+
+		<p>
+			An example of how <code>EnumParam</code> works. Due to the way TypeScript functions, we need
+			to use <code>readonly string[]</code> instead of <code>Enum</code>s.
+		</p>
+		<p>
+			Remember to add <code>as const</code> when creating an <code>EnumParam</code> to improve editor
+			IntelliSense support.
+		</p>
+		<p>For instance:</p>
+		<code>const fruitParam = createEnumParam(['🍍', '🍉', '🍌', '🥝', '🍋'] as const);</code>
 	</div>
 </div>
 
@@ -81,6 +108,15 @@
 </div>
 
 <style>
+	:global(body) {
+		margin: 0;
+		padding: 0;
+		min-height: 100vh;
+		background: #222;
+		color: #fff;
+		font-family: sans;
+	}
+
 	.grid {
 		padding: 2rem;
 		display: flex;
@@ -99,6 +135,10 @@
 		flex-direction: column;
 		align-items: center;
 		border-bottom: solid 2px #333;
+	}
+
+	.example > p {
+		text-align: center;
 	}
 
 	.example > h2 {

@@ -2,7 +2,7 @@ import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { createHighlighter } from 'shiki';
 
-const theme = 'catppuccin-macchiato';
+const theme = 'poimandres';
 
 const highlighter = await createHighlighter({
 	langs: ['svelte'],

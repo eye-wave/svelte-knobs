@@ -1,58 +1,118 @@
-# create-svelte
+# svelte-knobs
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+![Version](https://img.shields.io/npm/v/svelte-knobs)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-Read more about creating a library [in the docs](https://kit.svelte.dev/docs/packaging).
+`svelte-knobs` is a Svelte component library for building customizable knob controls.
 
-## Creating a project
+Inspired by:
 
-If you're seeing this, you've probably already done this step. Congrats!
+- [solid-knobs](https://github.com/tahti-studio/solid-knobs)
+- [nih-plug](https://github.com/robbert-vdh/nih-plug)
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+[Web demo](https://eye-wave.github.io/svelte-knobs)
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+## Installation
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Add the library to your project:
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+npm install svelte-knobs
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+## Usage
 
-## Building
+Import the `Knob` component and use it in your Svelte application:
 
-To build your library:
+```svelte
+<script>
+	import { Knob } from 'svelte-knobs';
+	let volume = 50;
+</script>
 
-```bash
-npm run package
+<Knob bind:value={volume} label="Volume" unit="%" />
 ```
 
-To create a production version of your showcase app:
+### Examples
 
-```bash
-npm run build
+#### Basic Knob
+
+```typescript
+import { createFloatParam, createRange } from 'svelte-knobs';
+
+const basicParam = createFloatParam(createRange('lin', 0, 100));
+let basicValue = 0;
 ```
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```bash
-npm publish
+```svelte
+<Knob param={basicParam} bind:value={basicValue} label="Volume" unit="%" />
 ```
+
+A basic knob control with linear scaling.
+
+#### Logarithmic Knob
+
+```typescript
+import { createFloatParam, createRange } from 'svelte-knobs';
+
+const logParam = createFloatParam(createRange('log', 20, 20_000));
+let logValue = 20;
+```
+
+```svelte
+<Knob param={logParam} bind:value={logValue} label="Frequency" unit="Hz" />
+```
+
+Knob with logarithmic scaling (default base is 10).
+
+#### Smoothness Control
+
+Control the knob's smoothness by adjusting the `stiffness` property.
+
+```svelte
+<Knob param={smoothParam} bind:value={smoothValue} label="Amount" unit="%" stiffness={0.1} />
+<Knob param={smoothParam} bind:value={smoothValue} label="Amount" unit="%" stiffness={1} />
+```
+
+#### Snap Points
+
+Set specific snap points and adjust snapping sensitivity using `snapThreshold`.
+
+```typescript
+import { createFloatParam, createRange } from 'svelte-knobs';
+
+const snapParam = createFloatParam(createRange('lin', 0, 2000));
+const snapPoints = Array.from({ length: 5 }, (_, i) => i * 500);
+
+let snapValue = 0;
+```
+
+```svelte
+<Knob
+	param={snapParam}
+	bind:value={snapValue}
+	snapValues={snapPoints}
+	snapThreshold={0.1}
+	label="Release"
+	unit="ms"
+/>
+```
+
+#### Enum Parameter
+
+Example usage of `EnumParam` for working with enumerated options.
+
+```typescript
+import { createEnumParam, type Variant } from 'svelte-knobs';
+
+const fruitParam = createEnumParam(['🍍', '🍉', '🍌', '🍋'] as const);
+let fruitValue: Variant<typeof fruitParam> = '🍉';
+```
+
+```svelte
+<Knob param={fruitParam} bind:value={fruitValue} label="Fruit" />
+```
+
+## License
+
+MIT License

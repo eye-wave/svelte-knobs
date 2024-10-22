@@ -7,6 +7,7 @@
 
 Inspired by:
 
+- [vital](https://vital.audio)
 - [solid-knobs](https://github.com/tahti-studio/solid-knobs)
 - [nih-plug](https://github.com/robbert-vdh/nih-plug)
 

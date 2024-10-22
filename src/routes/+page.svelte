@@ -1,5 +1,8 @@
 <script lang="ts">
+	// remove next
 	import './style.css';
+	// remove next
+	import CopyPaste from './CopyPaste.svelte';
 	import {
 		createEnumParam,
 		createFloatParam,
@@ -28,9 +31,13 @@
 </script>
 
 <div class="grid">
+	<h1 class="example"># svelte-knobs</h1>
+
 	<div class="example">
 		<h2>Basic</h2>
 		<Knob param={basicParam} bind:value={basicValue} label="Volume" unit="%" />
+
+		<p>Basic knob with linear param.</p>
 	</div>
 
 	<div class="example">
@@ -70,7 +77,7 @@
 
 <div class="code">
 	<h2>Code for this Demo:</h2>
-	%self%
+	<CopyPaste>%self%</CopyPaste>
 </div>
 
 <style>

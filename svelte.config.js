@@ -1,8 +1,8 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { createHighlighter } from 'shiki';
 
-const theme = 'github-dark';
+const theme = 'catppuccin-macchiato';
 
 const highlighter = await createHighlighter({
 	langs: ['svelte'],
@@ -13,7 +13,10 @@ function printSelf() {
 	return {
 		name: 'print-self',
 		markup({ content }) {
+			if (!content.match(/%self%/)) return { code: content };
+
 			const altered = content
+				.replace(/^\s*\/\/ remove next\n.+/gm, '')
 				.replace('$lib/index.js', 'svelte-knobs')
 				.replace(/<div class="code"[\S\s]+<\/div>/, '')
 				.replace(/\.code {[\s\S]+\}/, '');

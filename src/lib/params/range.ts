@@ -4,7 +4,7 @@ type BaseRange = {
 };
 
 export type LinearRange = { type: 'lin' } & BaseRange;
-export type LogRange = { type: 'log'; base?: number } & BaseRange;
+export type LogRange = { type: 'log'; base: number } & BaseRange;
 
 export type Range = LinearRange | LogRange;
 export type RangeType = Range['type'];
@@ -16,7 +16,7 @@ export function createRange(type: RangeType, min: number, max: number, a?: numbe
 		case 'lin':
 			return { type: 'lin', min, max };
 		case 'log':
-			return { type: 'log', min, max, base: a };
+			return { type: 'log', min, max, base: a ?? 10 };
 		default:
 			throw TypeError(`RangeType: "${type}" does not exist.`);
 	}

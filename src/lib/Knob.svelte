@@ -14,9 +14,13 @@
 	export let decimalDigits = 0;
 	export let snapValues: number[] = [];
 	export let snapThreshold = 0.1;
+	export let disabled = false;
 
 	export let arcColor = '#ae98db';
 	export let bgColor = '#444';
+	export let disabledColor = '#777';
+
+	$: arcColor2 = disabled ? disabledColor : arcColor;
 
 	$: if (param.type === 'enum-param') snapValues = [];
 
@@ -62,6 +66,7 @@
 	}
 
 	function handleMouseMove(event: MouseEvent) {
+		if (disabled) return;
 		if (!isDragging) return;
 		const deltaY = startY - event.clientY;
 		const deltaValue = deltaY / 200;
@@ -129,12 +134,14 @@
 	}
 
 	function drawSnapMarkers() {
-		if (snapValues.length === 0 || param.type !== 'float-param') return '';
+		if (param.type !== 'enum-param' && snapValues.length === 0) return null;
 
 		let paths = [];
 
-		for (let snapValue of snapValues) {
-			const normalizedSnapValue = normalize(snapValue, param);
+		const values = param.type === 'enum-param' ? param.variants : snapValues;
+		for (let snapValue of values) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const normalizedSnapValue = normalize(snapValue as any, param as any);
 			const angle = normalizedSnapValue * 270 - 135;
 			const [x1, y1] = polarToCartesian(center, center, arcRadius, angle);
 			const [x2, y2] = polarToCartesian(center, center, size * 0.46, angle);
@@ -151,8 +158,9 @@
 
 <svelte:window on:mousemove={handleMouseMove} on:mouseup={handleMouseUp} />
 
-<div class="container">
+<div class="container" style={$$props.style}>
 	<svg
+		class={$$props.class}
 		role="slider"
 		tabindex="0"
 		aria-valuenow={normalizedValue}
@@ -165,7 +173,7 @@
 		on:mousedown={handleMouseDown}
 	>
 		<circle cx={center} cy={center} r={circleRadius} fill={bgColor}></circle>
-		{#if snapValues.length > 0}
+		{#if snapValues.length > 0 || param.type === 'enum-param'}
 			<!-- Snap markers -->
 			<path d={drawSnapMarkers()} stroke={bgColor} />
 		{/if}
@@ -178,7 +186,7 @@
 		<path
 			d={describeArc(center, center, arcRadius, -135, $rotationDegrees)}
 			fill="none"
-			stroke={arcColor}
+			stroke={arcColor2}
 		/>
 		<!-- Knob indicator -->
 		<line

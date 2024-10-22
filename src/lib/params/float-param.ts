@@ -18,8 +18,10 @@ export function normalize(value: number, param: FloatParam): number {
 			return (value - range.min) / (range.max - range.min);
 		case 'log': {
 			const base = range.base ?? 10;
-			const logFunc = base === 10 ? Math.log10 : base === 2 ? Math.log2 : Math.log;
-			return (logFunc(value) - logFunc(range.min)) / (logFunc(range.max) - logFunc(range.min));
+			const min = log(range.min, base);
+			const max = log(range.max, base);
+
+			return (log(value, base) - min) / (max - min);
 		}
 		default:
 			throw new Error('Unsupported range type');
@@ -33,12 +35,31 @@ export function unnormalize(value: number, param: FloatParam): number {
 			return value * (range.max - range.min) + range.min;
 		case 'log': {
 			const base = range.base ?? 10;
-			const logFunc = base === 10 ? Math.log10 : base === 2 ? Math.log2 : Math.log;
-			const expFunc =
-				base === 10 ? Math.pow.bind(null, 10) : base === 2 ? Math.pow.bind(null, 2) : Math.exp;
-			return expFunc(value * (logFunc(range.max) - logFunc(range.min)) + logFunc(range.min));
+			const min = log(range.min, base);
+			const max = log(range.max, base);
+
+			return exp(value * (max - min) + min, base);
 		}
 		default:
 			throw new Error('Unsupported range type');
 	}
+}
+
+function log(value: number, base = 10): number {
+	if (value === 0) return 0;
+
+	const x = value < 0 ? -value : value;
+	const sign = Math.sign(value);
+
+	if (base === 10) return sign * Math.log10(x);
+	if (base === 2) return sign * Math.log2(x);
+	if (base === Math.E) return sign * Math.log(x);
+
+	return sign * (Math.log(x) / Math.log(base));
+}
+
+function exp(value: number, base = 10): number {
+	const x = value < 0 ? -value : value;
+
+	return Math.pow(base, x) * Math.sign(value);
 }

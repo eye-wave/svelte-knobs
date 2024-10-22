@@ -70,7 +70,7 @@ Set specific snap points and adjust snapping sensitivity using `snapThreshold`.
 import { createFloatParam, createRange } from 'svelte-knobs';
 
 const snapParam = createFloatParam(createRange('lin', 0, 2000));
-const snapPoints = Array.from({ length: 5 }, (_, i) => i * 500);
+const snapPoints = [0, 500, 1000, 1500, 2000];
 
 let snapValue = 0;
 ```
@@ -99,6 +99,14 @@ let fruitValue: Variant<typeof fruitParam> = '🍉';
 
 ```svelte
 <Knob param={fruitParam} bind:value={fruitValue} label="Fruit" />
+```
+
+#### Disabled Knob
+
+Disable knob interactivity
+
+```svelte
+<Knob param={basicParam} value={58} disabled />
 ```
 
 ## License

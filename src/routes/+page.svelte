@@ -10,7 +10,8 @@
 	} from '$lib/index.js';
 
 	const basicParam = createFloatParam(createRange('lin', 0, 100));
-	const logParam = createFloatParam(createRange('log', 20, 20_000));
+	const freqParam = createFloatParam(createRange('log', 20, 20_000));
+	const gainParam = createFloatParam(createRange('log', -30, 30, Math.E));
 	const smoothParam = createFloatParam(createRange('lin', 0, 100));
 	const snapParam = createFloatParam(createRange('lin', 0, 2000));
 	const enumParam = createEnumParam(['🍍', '🍉', '🍌', '🍎', '🥭', '🍇', '🥝', '🍋'] as const);
@@ -20,7 +21,8 @@
 	const snapPoints = Array.from({ length: 5 }, (_, i) => i * 500);
 
 	let basicValue = 0;
-	let logValue = 20;
+	let freqValue = 20;
+	let gainValue = 20;
 	let smoothValue = 0;
 	let snapValue = 0;
 	let enumValue: Variant<typeof enumParam> = '🍎';
@@ -40,7 +42,8 @@
 
 	<div class="example">
 		<h2>Logarithmic</h2>
-		<Knob param={logParam} bind:value={logValue} label="Frequency" unit="hz" />
+		<Knob param={freqParam} bind:value={freqValue} label="Frequency" unit="hz" />
+		<Knob param={gainParam} bind:value={gainValue} label="Gain" unit="dB" />
 
 		<p>A knob with logarithmic scaling (default base is 10).</p>
 	</div>
@@ -90,8 +93,9 @@
 		<Knob param={oscParam} bind:value={oscValue} label="Oscillator Type" />
 
 		<p>
-			An example of how <code>EnumParam</code> works. Due to the way TypeScript functions, we need
-			to use <code>readonly string[]</code> instead of <code>Enum</code>s.
+			An example of how <code>EnumParam</code> works: due to the way TypeScript functions, we need
+			to use <code>readonly string[]</code> instead of <code>Enum</code>s. Since enums are a small
+			subset of some strings, snap markers are added automatically for clarity.
 		</p>
 		<p>
 			Remember to add <code>as const</code> when creating an <code>EnumParam</code> to improve editor
@@ -99,6 +103,37 @@
 		</p>
 		<p>For instance:</p>
 		<code>const fruitParam = createEnumParam(['🍍', '🍉', '🍌', '🥝', '🍋'] as const);</code>
+	</div>
+
+	<div class="example">
+		<h2>Disabled</h2>
+
+		<Knob param={basicParam} value={58} disabled />
+
+		<p>
+			Just like <code>{'<button>'}</code> and other interactive HTML elements,
+			<code>{'<Knob />'}</code> can also be disabled.
+		</p>
+	</div>
+
+	<div class="example">
+		<h2>Colors</h2>
+
+		<Knob param={basicParam} value={24} label="Svelte theme" arcColor="#ff3e00" />
+		<Knob
+			param={basicParam}
+			value={48}
+			label="Light theme"
+			arcColor="#4292d3"
+			bgColor="#eef"
+			style="color:#000"
+		/>
+		<Knob param={basicParam} value={64} label="Disabled color" disabledColor="#aaa" disabled />
+
+		<p>
+			Of course, <code>{'<Knob />'}</code> colors can be customized to look however you want.
+			<b>Disclaimer</b>: Font and thumb colors are based on the current font color.
+		</p>
 	</div>
 </div>
 

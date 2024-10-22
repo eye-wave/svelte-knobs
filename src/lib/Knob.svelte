@@ -37,6 +37,7 @@
 	// preventing the user from selecting that value
 	function completeFixedSnapValues(snapValues: number[]) {
 		if (param.type === 'enum-param') return [];
+		if (snapValues.length < 1) return [];
 
 		const { min: start, max: end } = param.range;
 		const clone = [...snapValues];

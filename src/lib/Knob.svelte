@@ -25,8 +25,6 @@
 	$: circleRadius = size * 0.32;
 	$: lineWidth = size * 0.04;
 
-	$: rotationDegrees = spring(0, { stiffness });
-
 	let isDragging = false;
 	let startY: number;
 	let startValue: number;
@@ -49,6 +47,9 @@
 	}
 
 	$: fixedSnapValues = completeFixedSnapValues(snapValues);
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const rotationDegrees = spring(normalize(value as any, param as any) * 270 - 135, { stiffness });
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	$: normalizedValue = normalize(value as any, param as any);

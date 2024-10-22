@@ -22,19 +22,6 @@ npm install svelte-knobs
 
 ## Usage
 
-Import the `Knob` component and use it in your Svelte application:
-
-```svelte
-<script>
-	import { Knob } from 'svelte-knobs';
-	let volume = 50;
-</script>
-
-<Knob bind:value={volume} label="Volume" unit="%" />
-```
-
-### Examples
-
 #### Basic Knob
 
 ```typescript

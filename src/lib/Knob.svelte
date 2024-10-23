@@ -1,39 +1,62 @@
 <script lang="ts">
-	import { spring } from 'svelte/motion';
-	import { createEventDispatcher } from 'svelte';
-	import type { EnumParam, FloatParam } from './params.js';
 	import { normalize, format, unnormalizeToString, unnormalizeToNumber } from './params.js';
+	import { spring } from 'svelte/motion';
+	import type { EnumParam, FloatParam } from './params.js';
 
-	const size = 80;
+	interface Props {
+		style?: string;
+		class?: string;
+		label?: string;
+		unit?: string;
+		size?: number;
+		onChange?: (value: number | string) => void;
+		param: FloatParam | EnumParam<readonly string[]>;
+		value: number | string;
+		stiffness?: number;
+		decimalDigits?: number;
+		snapValues?: Array<number>;
+		snapThreshold?: number;
+		disabled?: boolean;
+		colors?: {
+			arc?: string;
+			bg?: string;
+			disabled?: string;
+		};
+	}
 
-	export let label = '';
-	export let unit = '';
-	export let param: FloatParam | EnumParam<readonly string[]>;
-	export let value: number | string;
-	export let stiffness = 0.5;
-	export let decimalDigits = 0;
-	export let snapValues: number[] = [];
-	export let snapThreshold = 0.1;
-	export let disabled = false;
+	let {
+		style,
+		class: className,
+		label = '',
+		unit = '',
+		size = 80,
+		onChange,
+		value = $bindable(),
+		param,
+		stiffness = 0.5,
+		decimalDigits = 0,
+		snapValues = [],
+		snapThreshold = 0.1,
+		disabled = false,
+		colors = {}
+	}: Props = $props();
 
-	export let arcColor = '#ae98db';
-	export let bgColor = '#444';
-	export let disabledColor = '#777';
+	const {
+		arc: arcColor = '#ae98db',
+		bg: bgColor = '#444',
+		disabled: disabledColor = '#777'
+	} = colors;
 
-	$: arcColor2 = disabled ? disabledColor : arcColor;
+	const arcColor2 = $derived(disabled ? disabledColor : arcColor);
 
-	$: if (param.type === 'enum-param') snapValues = [];
+	const center = $derived(size / 2);
+	const arcRadius = $derived(size * 0.4);
+	const circleRadius = $derived(size * 0.32);
+	const lineWidth = $derived(size * 0.04);
 
-	$: center = size / 2;
-	$: arcRadius = size * 0.4;
-	$: circleRadius = size * 0.32;
-	$: lineWidth = size * 0.04;
-
-	let isDragging = false;
+	let isDragging = $state(false);
 	let startY: number;
 	let startValue: number;
-
-	const dispatch = createEventDispatcher();
 
 	// This is needed in case some snap value is very close to the min or max range
 	// preventing the user from selecting that value
@@ -50,14 +73,20 @@
 		return clone;
 	}
 
-	$: fixedSnapValues = completeFixedSnapValues(snapValues);
+	const fixedSnapValues = $derived(completeFixedSnapValues(snapValues));
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const rotationDegrees = spring(normalize(value as any, param as any) * 270 - 135, { stiffness });
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	$: normalizedValue = normalize(value as any, param as any);
-	$: rotationDegrees.set(normalizedValue * 270 - 135);
+	const normalizedValue = $derived(normalize(value as any, param as any));
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const formatted = $derived(isDragging ? format(value as any, param as any, decimalDigits) : '');
+
+	$effect(() => {
+		rotationDegrees.set(normalizedValue * 270 - 135);
+	});
 
 	function handleMouseDown(event: MouseEvent) {
 		isDragging = true;
@@ -83,7 +112,7 @@
 
 			if (value !== newValue) {
 				value = newValue;
-				dispatch('change', { value });
+				onChange?.(value);
 			}
 
 			return;
@@ -109,7 +138,7 @@
 
 		if (value !== newValue) {
 			value = newValue;
-			dispatch('change', { value });
+			onChange?.(value);
 		}
 	}
 
@@ -151,16 +180,13 @@
 
 		return paths.join(' ');
 	}
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	$: formatted = isDragging ? format(value as any, param as any, decimalDigits) : '';
 </script>
 
-<svelte:window on:mousemove={handleMouseMove} on:mouseup={handleMouseUp} />
+<svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} />
 
-<div class="container" style={$$props.style}>
+<div class="container" {style}>
 	<svg
-		class={$$props.class}
+		class={className}
 		role="slider"
 		tabindex="0"
 		aria-valuenow={normalizedValue}
@@ -170,7 +196,7 @@
 		stroke-linecap="round"
 		stroke-linejoin="round"
 		stroke-width={lineWidth}
-		on:mousedown={handleMouseDown}
+		onmousedown={handleMouseDown}
 	>
 		<circle cx={center} cy={center} r={circleRadius} fill={bgColor}></circle>
 		{#if snapValues.length > 0 || param.type === 'enum-param'}

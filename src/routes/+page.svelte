@@ -45,7 +45,7 @@
 	<div class="example">
 		<h2>Logarithmic</h2>
 		<Knob param={freqParam} bind:value={freqValue} label="Frequency" unit="hz" />
-		<Knob param={gainParam} bind:value={gainValue} label="Gain" unit="dB" />
+		<Knob param={gainParam} bind:value={gainValue} label="Gain" unit="dB" decimalDigits={1} />
 		<Knob param={qParam} bind:value={qValue} label="Q" unit="dB" decimalDigits={2} />
 
 		<p>A knob with logarithmic scaling (default base is 10).</p>
@@ -122,16 +122,25 @@
 	<div class="example">
 		<h2>Colors</h2>
 
-		<Knob param={basicParam} value={24} label="Svelte theme" arcColor="#ff3e00" />
+		<Knob param={basicParam} value={24} label="Svelte theme" colors={{ arc: '#ff3e00' }} />
 		<Knob
 			param={basicParam}
 			value={48}
 			label="Light theme"
-			arcColor="#4292d3"
-			bgColor="#eef"
+			colors={{
+				arc: '#4292d3',
+				bg: '#eef'
+			}}
 			style="color:#000"
 		/>
-		<Knob param={basicParam} value={64} label="Disabled color" disabledColor="#aaa" disabled />
+		<Knob
+			onChange={console.log}
+			param={basicParam}
+			value={64}
+			label="Disabled color"
+			colors={{ disabled: '#ccc' }}
+			disabled
+		/>
 
 		<p>
 			Of course, <code>{'<Knob />'}</code> colors can be customized to look however you want.

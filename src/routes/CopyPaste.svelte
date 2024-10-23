@@ -1,7 +1,11 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+
 	let ref: HTMLPreElement;
-	let copied = false;
+	let copied = $state(false);
 	let timeoutId = -1;
+
+	let { children }: { children: Snippet } = $props();
 
 	function copyToClipboard() {
 		const code = ref.textContent?.trim();
@@ -18,7 +22,7 @@
 </script>
 
 <div class="code-container">
-	<button on:click={copyToClipboard} class="copy-button" aria-label="Copy code to clipboard">
+	<button onclick={copyToClipboard} class="copy-button" aria-label="Copy code to clipboard">
 		{#if copied}
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +54,7 @@
 		{/if}
 	</button>
 	<pre bind:this={ref}>
-    <slot />
+    {@render children?.()}
   </pre>
 </div>
 

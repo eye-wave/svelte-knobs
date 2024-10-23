@@ -45,10 +45,8 @@ export function unnormalize(value: number, param: FloatParam): number {
 	}
 }
 
-function log(value: number, base = 10): number {
-	if (value === 0) return 0;
-
-	const x = value < 0 ? -value : value;
+export function log(value: number, base = 10): number {
+	const x = Math.abs(value) + 1;
 	const sign = Math.sign(value);
 
 	if (base === 10) return sign * Math.log10(x);
@@ -58,8 +56,13 @@ function log(value: number, base = 10): number {
 	return sign * (Math.log(x) / Math.log(base));
 }
 
-function exp(value: number, base = 10): number {
-	const x = value < 0 ? -value : value;
+export function exp(value: number, base = 10): number {
+	const sign = Math.sign(value);
+	const expValue = Math.abs(value);
 
-	return Math.pow(base, x) * Math.sign(value);
+	if (base === 10) return sign * (Math.pow(10, expValue) - 1);
+	if (base === 2) return sign * (Math.pow(2, expValue) - 1);
+	if (base === Math.E) return sign * (Math.exp(expValue) - 1);
+
+	return sign * (Math.pow(base, expValue) - 1);
 }

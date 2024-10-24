@@ -267,6 +267,10 @@
 </div>
 
 <style lang="postcss">
+	span {
+		user-select: none;
+	}
+
 	.container {
 		position: relative;
 		display: flex;

@@ -7,6 +7,8 @@
 		"module": "ESNext",
 		"moduleDetection": "force",
 		"allowJs": true,
+		"checkJs": true,
+		"resolveJsonModule": true,
 
 		// Bundler mode
 		"moduleResolution": "bundler",

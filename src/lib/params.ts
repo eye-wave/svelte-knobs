@@ -1,13 +1,13 @@
-import type { EnumParam } from './params/enum-param';
-import type { FloatParam } from './params/float-param';
+import type { EnumParam } from './params/enum-param.js';
+import type { FloatParam } from './params/float-param.js';
 
-import * as ENUM from './params/enum-param';
-import * as FLOAT from './params/float-param';
+import * as ENUM from './params/enum-param.js';
+import * as FLOAT from './params/float-param.js';
 
-export { createEnumParam, type EnumParam, type Variant } from './params/enum-param';
-export { createFloatParam, type FloatParam } from './params/float-param';
+export { createEnumParam, type EnumParam, type Variant } from './params/enum-param.js';
+export { createFloatParam, type FloatParam } from './params/float-param.js';
 
-export * from './params/range';
+export * from './params/range.js';
 
 export type Param = EnumParam<readonly string[]> | FloatParam;
 

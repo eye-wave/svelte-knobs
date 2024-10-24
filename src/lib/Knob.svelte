@@ -106,6 +106,34 @@
 		isDragging = false;
 	}
 
+	$effect(() => {
+		// this was easier in svelte 4 :/
+		window.addEventListener('touchmove', handleTouchMove, { passive: false });
+		return () => window.removeEventListener('touchmove', handleTouchMove);
+	});
+
+	function handleTouchStart(event: TouchEvent) {
+		isDragging = true;
+		const touch = event.touches?.[0];
+		if (touch === undefined) return;
+		startY = touch.clientY;
+		startValue = normalizedValue;
+	}
+
+	function handleTouchMove(event: TouchEvent) {
+		if (!isDragging) return;
+
+		event.preventDefault();
+		if (disabled) return;
+
+		const touch = event.touches?.[0];
+		if (touch === undefined) return;
+
+		const deltaY = startY - touch.clientY;
+		const deltaValue = deltaY / 200;
+		setValue(Math.max(0, Math.min(1, startValue + deltaValue)));
+	}
+
 	function setValue(newNormalizedValue: number) {
 		if (param.type === 'enum-param') {
 			const newValue = unnormalizeToString(newNormalizedValue, param);
@@ -182,7 +210,7 @@
 	}
 </script>
 
-<svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} />
+<svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} ontouchend={handleMouseUp} />
 
 <div class="container" {style}>
 	<svg
@@ -197,6 +225,7 @@
 		stroke-linejoin="round"
 		stroke-width={lineWidth}
 		onmousedown={handleMouseDown}
+		ontouchstart={handleTouchStart}
 	>
 		<circle cx={center} cy={center} r={circleRadius} fill={bgColor}></circle>
 		{#if snapValues.length > 0 || param.type === 'enum-param'}

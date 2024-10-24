@@ -63,10 +63,10 @@
 	"svelte": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"type": "module",
-  "simple-git-hooks": {
-    "pre-commit": "bun lint-staged"
-  },
-  "lint-staged": {
-    "*": "eslint --fix"
-  }
+	"simple-git-hooks": {
+		"pre-commit": "bun lint-staged"
+	},
+	"lint-staged": {
+		"*": "eslint --fix"
+	}
 }

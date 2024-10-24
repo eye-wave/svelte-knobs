@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { normalize, format, unnormalizeToString, unnormalizeToNumber } from './params.js';
+	import { normalize, format, unnormalizeToString, unnormalizeToNumber } from './params';
 	import { spring } from 'svelte/motion';
-	import type { EnumParam, FloatParam } from './params.js';
+	import type { EnumParam, FloatParam } from './params';
 
 	interface Props {
 		style?: string;

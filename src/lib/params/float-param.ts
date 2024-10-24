@@ -1,4 +1,4 @@
-import { type Range } from './range.js';
+import { type Range } from './range';
 
 export type FloatParam = {
 	type: 'float-param';

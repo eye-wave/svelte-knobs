@@ -51,7 +51,7 @@
 		"lint-staged": "^15.2.10",
 		"prettier": "^3.3.3",
 		"prettier-plugin-svelte": "^3.2.7",
-		"publint": "^0.2.11",
+		"publint": "^0.2.12",
 		"shiki": "^1.22.0",
 		"simple-git-hooks": "^2.11.1",
 		"svelte": "^5.1.0",

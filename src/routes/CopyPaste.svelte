@@ -59,24 +59,28 @@
 </div>
 
 <style>
-	:global(pre.shiki) {
+  :global(pre.shiki) {
 		box-sizing: border-box;
+    border-radius: 8px;
+    overflow: scroll;
 		padding: 1rem;
 	}
 
 	:global(.shiki > code) {
 		text-wrap: wrap;
+    tab-size: 2;
 	}
 
 	.code-container {
+		width: 100%;
 		position: relative;
 		margin-bottom: 1rem;
 	}
 
 	.copy-button {
 		position: absolute;
-		top: 2.5rem;
-		right: 1rem;
+		top: 3rem;
+		right: 0.5rem;
 		padding: 0.5rem;
 		border: none;
 		border-radius: 0.375rem;

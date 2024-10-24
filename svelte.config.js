@@ -1,31 +1,45 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { createHighlighter } from 'shiki';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 
-const theme = 'poimandres';
+const theme = 'one-dark-pro';
 
 const highlighter = await createHighlighter({
 	langs: ['svelte'],
 	themes: [theme]
 });
 
-function printSelf() {
+function highlight(code) {
+	const html = highlighter.codeToHtml(code, {
+		lang: 'svelte',
+		theme
+	});
+
+  return html
+}
+
+function printComponent() {
 	return {
 		name: 'print-self',
-		markup({ content }) {
-			if (!content.match(/%self%/)) return { code: content };
+		markup({ content, filename }) {
+			const replacement = content.replace(/%import\('([^']+)'\)%/g, (match, pth) => {
+				const currentDir = path.dirname(filename);
+				const compPath = path.join(currentDir, pth);
 
-			const altered = content
-				.replace(/^\s*\/\/ remove next\n.+/gm, '')
-				.replace('$lib/index.js', 'svelte-knobs')
-				.replace(/<div class="code"[\S\s]+<\/div>/, '')
-				.replace(/\.code {[\s\S]+\}/, '');
+				try {
+					const content = fs.readFileSync(compPath, 'utf-8').replace('$lib', 'svelte-knobs');
+					const html = highlight(content);
 
-			const html = highlighter.codeToHtml(altered, { lang: 'svelte', theme });
-			const replacement = `{@html \`${html}\`}`;
+					return `{@html \`${html}\`}`;
+				} catch {
+					return match;
+				}
+			});
 
 			return {
-				code: content.replaceAll('%self%', replacement)
+				code: replacement
 			};
 		}
 	};
@@ -35,7 +49,7 @@ function printSelf() {
 const config = {
 	// Consult https://kit.svelte.dev/docs/integrations#preprocessors
 	// for more information about preprocessors
-	preprocess: [printSelf(), vitePreprocess()],
+	preprocess: [printComponent(), vitePreprocess()],
 
 	kit: {
 		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.

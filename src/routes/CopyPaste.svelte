@@ -59,16 +59,16 @@
 </div>
 
 <style>
-  :global(pre.shiki) {
+	:global(pre.shiki) {
 		box-sizing: border-box;
-    border-radius: 8px;
-    overflow: scroll;
+		border-radius: 8px;
+		overflow: scroll;
 		padding: 1rem;
 	}
 
 	:global(.shiki > code) {
 		text-wrap: wrap;
-    tab-size: 2;
+		tab-size: 2;
 	}
 
 	.code-container {

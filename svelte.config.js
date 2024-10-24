@@ -17,7 +17,7 @@ function highlight(code) {
 		theme
 	});
 
-  return html
+	return html;
 }
 
 function printComponent() {

@@ -138,9 +138,4 @@
 	.example > h2 {
 		user-select: none;
 	}
-
-	.code {
-		max-width: 800px;
-		margin: 0 auto;
-	}
 </style>

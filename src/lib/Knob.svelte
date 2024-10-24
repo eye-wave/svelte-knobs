@@ -12,6 +12,7 @@
 		onChange?: (value: number | string) => void;
 		param: FloatParam | EnumParam<readonly string[]>;
 		value: number | string;
+		defaultValue?: number | string;
 		stiffness?: number;
 		decimalDigits?: number;
 		snapValues?: Array<number>;
@@ -32,6 +33,7 @@
 		size = 80,
 		onChange,
 		value = $bindable(),
+		defaultValue,
 		param,
 		stiffness = 0.5,
 		decimalDigits = 0,
@@ -104,6 +106,17 @@
 
 	function handleMouseUp() {
 		isDragging = false;
+	}
+
+	function handleDblClick() {
+		const val =
+			defaultValue ??
+			(param as FloatParam)?.range.min ??
+			(param as EnumParam<string[]>).variants?.[0];
+		if (val === undefined) return;
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		setValue(Math.max(0, Math.min(1, normalize(val as any, param as any))));
 	}
 
 	$effect(() => {
@@ -226,6 +239,7 @@
 		stroke-width={lineWidth}
 		onmousedown={handleMouseDown}
 		ontouchstart={handleTouchStart}
+		ondblclick={handleDblClick}
 	>
 		<circle cx={center} cy={center} r={circleRadius} fill={bgColor}></circle>
 		{#if snapValues.length > 0 || param.type === 'enum-param'}

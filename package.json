@@ -48,10 +48,12 @@
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.46.0",
 		"globals": "^15.11.0",
+		"lint-staged": "^15.2.10",
 		"prettier": "^3.3.3",
 		"prettier-plugin-svelte": "^3.2.7",
 		"publint": "^0.2.11",
 		"shiki": "^1.22.0",
+		"simple-git-hooks": "^2.11.1",
 		"svelte": "^5.1.0",
 		"svelte-check": "^4.0.5",
 		"typescript": "^5.6.3",
@@ -60,5 +62,11 @@
 	},
 	"svelte": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"type": "module"
+	"type": "module",
+  "simple-git-hooks": {
+    "pre-commit": "bun lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
+  }
 }

@@ -11,5 +11,12 @@
 </script>
 
 <Knob param={freqParam} bind:value={freqValue} label="Frequency" unit="hz" />
-<Knob param={gainParam} bind:value={gainValue} label="Gain" unit="dB" decimalDigits={1} defaultValue={0} />
+<Knob
+	param={gainParam}
+	bind:value={gainValue}
+	label="Gain"
+	unit="dB"
+	decimalDigits={1}
+	defaultValue={0}
+/>
 <Knob param={qParam} bind:value={qValue} label="Q" unit="dB" decimalDigits={2} />

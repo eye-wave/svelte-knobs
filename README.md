@@ -27,7 +27,7 @@ npm install svelte-knobs
 
 ```svelte
 <script lang="ts">
-	import { createFloatParam, Knob } from '$lib';
+	import { createFloatParam, Knob } from 'svelte-knobs';
 
 	const basicParam = createFloatParam('lin', 0, 100);
 	let basicValue = 0;

@@ -1,14 +1,14 @@
-import { type Range } from './range.js';
+import { createRange, type Range } from './range.js';
 
 export type FloatParam = {
 	type: 'float-param';
 	range: Range;
 };
 
-export function createFloatParam(range: Range): FloatParam {
+export function createFloatParam(...args: Parameters<typeof createRange>): FloatParam {
 	return {
 		type: 'float-param',
-		range
+		range: createRange(...args)
 	};
 }
 export function normalize(value: number, param: FloatParam): number {

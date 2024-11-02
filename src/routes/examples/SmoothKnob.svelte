@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { createFloatParam, createRange, Knob } from '$lib';
+	import { createFloatParam, Knob } from '$lib';
 
-	const smoothParam = createFloatParam(createRange('lin', 0, 100));
+	const smoothParam = createFloatParam('lin', 0, 100);
 	let smoothValue = 0;
 </script>
 

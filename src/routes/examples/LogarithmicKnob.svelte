@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { createFloatParam, createRange, Knob } from '$lib';
+	import { createFloatParam, Knob } from '$lib';
 
-	const freqParam = createFloatParam(createRange('log', 20, 20_000));
-	const gainParam = createFloatParam(createRange('log', -30, 30, Math.E));
-	const qParam = createFloatParam(createRange('log', 0.01, 30, 2));
+	const freqParam = createFloatParam('log', 20, 20_000);
+	const gainParam = createFloatParam('log', -30, 30, Math.E);
+	const qParam = createFloatParam('log', 0.01, 30, 2);
 
 	let freqValue = 20;
 	let gainValue = 0;

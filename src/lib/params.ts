@@ -13,8 +13,8 @@ export type Param = EnumParam<readonly string[]> | FloatParam;
 
 export function normalize<V extends readonly string[]>(value: string, param: EnumParam<V>): number;
 export function normalize(value: number, param: FloatParam): number;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function normalize(value: any, param: any): number {
+export function normalize(value: string | number, param: Param): number;
+export function normalize(value: string | number, param: Param): number {
 	switch (param.type) {
 		case 'enum-param': {
 			if (typeof value !== 'string')
@@ -27,6 +27,7 @@ export function normalize(value: any, param: any): number {
 			return FLOAT.normalize(value, param);
 		}
 		default:
+			//@ts-expect-error just in case
 			throw new TypeError(`Unsupported param type: ${param.type}`);
 	}
 }
@@ -36,6 +37,7 @@ export function unnormalizeToNumber<V extends readonly string[]>(
 	param: EnumParam<V>
 ): number;
 export function unnormalizeToNumber(value: number, param: FloatParam): number;
+export function unnormalizeToNumber(value: number, param: Param): number;
 export function unnormalizeToNumber(value: number, param: Param): number {
 	switch (param.type) {
 		case 'enum-param':
@@ -53,7 +55,8 @@ export function unnormalizeToString<V extends readonly string[]>(
 	param: EnumParam<V>
 ): V[number];
 export function unnormalizeToString(value: number, param: FloatParam): string;
-export function unnormalizeToString(value: number, param: Param): unknown {
+export function unnormalizeToString(value: number, param: Param): string;
+export function unnormalizeToString(value: number, param: Param): string {
 	switch (param.type) {
 		case 'enum-param':
 			return ENUM.unnormalizeToString(value, param);
@@ -70,6 +73,7 @@ export function format<V extends readonly string[]>(
 	param: EnumParam<V>
 ): V[number];
 export function format(value: number, param: FloatParam, precision?: number): number;
+export function format(value: unknown, param: Param, precision?: number): unknown;
 export function format(value: unknown, param: Param, precision?: number): unknown {
 	switch (param.type) {
 		case 'enum-param':

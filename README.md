@@ -25,14 +25,14 @@ npm install svelte-knobs
 
 #### Basic Knob
 
-```typescript
-import { createFloatParam, createRange } from 'svelte-knobs';
-
-const basicParam = createFloatParam(createRange('lin', 0, 100));
-let basicValue = 0;
-```
-
 ```svelte
+<script lang="ts">
+	import { createFloatParam, Knob } from '$lib';
+
+	const basicParam = createFloatParam('lin', 0, 100);
+	let basicValue = 0;
+</script>
+
 <Knob param={basicParam} bind:value={basicValue} label="Volume" unit="%" />
 ```
 
@@ -40,14 +40,14 @@ A basic knob control with linear scaling.
 
 #### Logarithmic Knob
 
-```typescript
-import { createFloatParam, createRange } from 'svelte-knobs';
-
-const logParam = createFloatParam(createRange('log', 20, 20_000));
-let logValue = 20;
-```
-
 ```svelte
+<script lang="ts">
+	import { createFloatParam } from 'svelte-knobs';
+
+	const logParam = createFloatParam('log', 20, 20_000);
+	let logValue = 20;
+</script>
+
 <Knob param={logParam} bind:value={logValue} label="Frequency" unit="Hz" />
 ```
 
@@ -69,7 +69,7 @@ Set specific snap points and adjust snapping sensitivity using `snapThreshold`.
 ```typescript
 import { createFloatParam, createRange } from 'svelte-knobs';
 
-const snapParam = createFloatParam(createRange('lin', 0, 2000));
+const snapParam = createFloatParam('lin', 0, 2000);
 const snapPoints = [0, 500, 1000, 1500, 2000];
 
 let snapValue = 0;

@@ -1,7 +1,7 @@
 {
 	"name": "svelte-knobs",
 	"description": "Svelte component library for building customizable knob controls.",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"repository": {
 		"url": "https://github.com/eye-wave/svelte-knobs"
 	},
@@ -40,11 +40,11 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.6",
-		"@sveltejs/kit": "^2.7.3",
+		"@sveltejs/kit": "^2.7.4",
 		"@sveltejs/package": "^2.3.7",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
 		"@types/eslint": "^9.6.1",
-		"eslint": "^9.13.0",
+		"eslint": "^9.14.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.46.0",
 		"globals": "^15.11.0",
@@ -52,12 +52,12 @@
 		"prettier": "^3.3.3",
 		"prettier-plugin-svelte": "^3.2.7",
 		"publint": "^0.2.12",
-		"shiki": "^1.22.1",
+		"shiki": "^1.22.2",
 		"simple-git-hooks": "^2.11.1",
-		"svelte": "^5.1.3",
+		"svelte": "^5.1.9",
 		"svelte-check": "^4.0.5",
 		"typescript": "^5.6.3",
-		"typescript-eslint": "^8.11.0",
+		"typescript-eslint": "^8.12.2",
 		"vite": "^5.4.10"
 	},
 	"svelte": "./dist/index.js",

@@ -11,6 +11,7 @@ export type RangeType = Range['type'];
 
 export function createRange(type: 'lin', min: number, max: number): LinearRange;
 export function createRange(type: 'log', min: number, max: number, base?: number): LogRange;
+export function createRange(type: RangeType, min: number, max: number, a?: number): Range;
 export function createRange(type: RangeType, min: number, max: number, a?: number): Range {
 	switch (type) {
 		case 'lin':

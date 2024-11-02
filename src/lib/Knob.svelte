@@ -2,6 +2,7 @@
 	import { normalize, format, unnormalizeToString, unnormalizeToNumber } from './params.js';
 	import { spring } from 'svelte/motion';
 	import type { EnumParam, FloatParam } from './params.js';
+	import { clamp } from './helpers/clamp.js';
 
 	interface Props {
 		style?: string;
@@ -18,6 +19,7 @@
 		snapValues?: Array<number>;
 		snapThreshold?: number;
 		disabled?: boolean;
+		draggable?: boolean;
 		colors?: {
 			arc?: string;
 			bg?: string;
@@ -40,6 +42,7 @@
 		snapValues = [],
 		snapThreshold = 0.1,
 		disabled = false,
+		draggable = true,
 		colors = {}
 	}: Props = $props();
 
@@ -76,32 +79,41 @@
 	}
 
 	const fixedSnapValues = $derived(completeFixedSnapValues(snapValues));
+	const rotationDegrees = spring(normalize(value, param) * 270 - 135, { stiffness });
+	const normalizedValue = $derived(normalize(value, param));
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const rotationDegrees = spring(normalize(value as any, param as any) * 270 - 135, { stiffness });
+	const formatted = $derived(isDragging ? format(value, param, decimalDigits) : '');
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const normalizedValue = $derived(normalize(value as any, param as any));
+	function toMobile(handler: ({ clientY }: MouseEvent) => boolean | void) {
+		return (event: TouchEvent) => {
+			const touch = event.touches?.[0];
+			if (touch === undefined) return;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const formatted = $derived(isDragging ? format(value as any, param as any, decimalDigits) : '');
+			const clientY = touch.clientY;
 
-	$effect(() => {
-		rotationDegrees.set(normalizedValue * 270 - 135);
-	});
-
-	function handleMouseDown(event: MouseEvent) {
-		isDragging = true;
-		startY = event.clientY;
-		startValue = normalizedValue;
+			// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+			handler({ clientY } as MouseEvent) && event.preventDefault();
+		};
 	}
 
-	function handleMouseMove(event: MouseEvent) {
+	function handleMouseDown({ clientY }: MouseEvent) {
+		if (!draggable) return;
+		isDragging = true;
+		startY = clientY;
+		startValue = normalizedValue;
+
+		return true;
+	}
+
+	function handleMouseMove({ clientY }: MouseEvent) {
+		if (!draggable) return;
 		if (disabled) return;
 		if (!isDragging) return;
-		const deltaY = startY - event.clientY;
+		const deltaY = startY - clientY;
 		const deltaValue = deltaY / 200;
-		setValue(Math.max(0, Math.min(1, startValue + deltaValue)));
+		setValue(clamp(startValue + deltaValue, 0, 1));
+
+		return true;
 	}
 
 	function handleMouseUp() {
@@ -115,37 +127,19 @@
 			(param as EnumParam<string[]>).variants?.[0];
 		if (val === undefined) return;
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		setValue(Math.max(0, Math.min(1, normalize(val as any, param as any))));
+		setValue(clamp(normalize(val, param), 0, 1));
 	}
 
+	const handleTouchStart = toMobile(handleMouseDown);
+	const handleTouchMove = toMobile(handleMouseMove);
+
 	$effect(() => {
+		rotationDegrees.set(normalizedValue * 270 - 135);
+
 		// this was easier in svelte 4 :/
 		window.addEventListener('touchmove', handleTouchMove, { passive: false });
 		return () => window.removeEventListener('touchmove', handleTouchMove);
 	});
-
-	function handleTouchStart(event: TouchEvent) {
-		isDragging = true;
-		const touch = event.touches?.[0];
-		if (touch === undefined) return;
-		startY = touch.clientY;
-		startValue = normalizedValue;
-	}
-
-	function handleTouchMove(event: TouchEvent) {
-		if (!isDragging) return;
-
-		event.preventDefault();
-		if (disabled) return;
-
-		const touch = event.touches?.[0];
-		if (touch === undefined) return;
-
-		const deltaY = startY - touch.clientY;
-		const deltaValue = deltaY / 200;
-		setValue(Math.max(0, Math.min(1, startValue + deltaValue)));
-	}
 
 	function setValue(newNormalizedValue: number) {
 		if (param.type === 'enum-param') {
@@ -210,8 +204,7 @@
 
 		const values = param.type === 'enum-param' ? param.variants : snapValues;
 		for (let snapValue of values) {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const normalizedSnapValue = normalize(snapValue as any, param as any);
+			const normalizedSnapValue = normalize(snapValue, param);
 			const angle = normalizedSnapValue * 270 - 135;
 			const [x1, y1] = polarToCartesian(center, center, arcRadius, angle);
 			const [x2, y2] = polarToCartesian(center, center, size * 0.46, angle);

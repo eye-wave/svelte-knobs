@@ -62,12 +62,11 @@
 	:global(pre.shiki) {
 		box-sizing: border-box;
 		border-radius: 8px;
-		overflow: scroll;
+		overflow-x: scroll;
 		padding: 1rem;
 	}
 
 	:global(.shiki > code) {
-		text-wrap: wrap;
 		tab-size: 2;
 	}
 

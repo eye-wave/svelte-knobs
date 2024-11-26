@@ -87,7 +87,9 @@
 			let i = -1;
 
 			async function decodeFrame() {
+				if (video.currentTime >= video.duration) return;
 				if (!dctx) throw Error('Failed to create canvas context');
+
 				dctx.clearRect(0, 0, decoderCanvas.width, decoderCanvas.height);
 				dctx.drawImage(video, 0, 0, decoderCanvas.width, decoderCanvas.height);
 

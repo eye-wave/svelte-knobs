@@ -13,7 +13,6 @@
 		style:height="{height}px"
 		use:viewport
 		onenterViewport={() => {
-			console.log('Lazy component is now vissible');
 			componentPromise = component();
 			isShowingComponent = true;
 		}}

@@ -99,9 +99,70 @@
 
 		<CopyPaste>%import('./examples/ColoredKnobs.svelte')%</CopyPaste>
 	</div>
+
+	<div class="example">
+		<h2>Image strip</h2>
+
+		<LazyComponent component={() => import('./examples/ImageStrip.svelte')} />
+
+		<p>
+			You can also create interactive knobs with a image slice.<br />
+			There's 2 ways of doing that here.
+			<code>{'<ImageKnob />'}</code> and <code>{'<VideoKnob />'}</code>
+		</p>
+		<p>Both having their own pros and cons. *</p>
+		<table>
+			<thead>
+				<tr>
+					<th></th>
+					<th>video knob</th>
+					<th>image knob</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>file size</td>
+					<td>tiny (20K)</td>
+					<td>small - large (264K - 408K)</td>
+				</tr>
+				<tr>
+					<td>load time</td>
+					<td>slow (~2.8s)</td>
+					<td>fast (~15ms)</td>
+				</tr>
+				<tr>
+					<td>initial responsiveness</td>
+					<td>delayed (only after video processing)</td>
+					<td>immediate</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<i>* Values in parentheses were measured on this example page.</i>
+
+		<p>
+			To compensate for the video knob load time, the first animation frame is drawn as soon as it
+			loads. However, the knob won't be fully responsive until the entire video is processed.
+		</p>
+
+		<p>
+			Also, try to always specify the <code>numberOfFrames</code> property, even though it's not required
+			for image knob. It will help calculate the frames better and avoid flickering.
+		</p>
+
+		<CopyPaste>%import('./examples/ImageStrip.svelte')%</CopyPaste>
+	</div>
 </div>
 
 <style>
+	th,
+	td {
+		padding: 8px;
+		font-size: 0.88rem;
+		font-weight: normal;
+		background: #00000050;
+	}
+
 	:global(body) {
 		margin: 0;
 		padding: 0;

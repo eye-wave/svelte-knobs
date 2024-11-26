@@ -126,9 +126,14 @@
 					<td>small - large (264K - 408K)</td>
 				</tr>
 				<tr>
-					<td>load time</td>
+					<td>load time (desktop)</td>
 					<td>slow (~2.8s)</td>
-					<td>fast (~15ms)</td>
+					<td>instant (~15ms)</td>
+				</tr>
+				<tr>
+					<td>load time (mobile)</td>
+					<td>very slow (~5.2s)</td>
+					<td>fast (~395ms)</td>
 				</tr>
 				<tr>
 					<td>initial responsiveness</td>

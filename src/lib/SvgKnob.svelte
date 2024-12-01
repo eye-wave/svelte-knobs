@@ -8,6 +8,7 @@
 		size?: number;
 		stiffness?: number;
 		class?: string;
+		strokeWidth?: number;
 		colors?: {
 			arc?: string;
 			bg?: string;
@@ -17,12 +18,17 @@
 
 	let {
 		style,
+		strokeWidth,
 		class: className,
 		label = '',
 		unit = '',
 		size = 80,
 		onChange,
 		value = $bindable(),
+		step,
+		acceleration,
+		maxSpeed,
+		initialDelay,
 		defaultValue,
 		param,
 		stiffness = 0.5,
@@ -89,23 +95,34 @@
 </script>
 
 <KnobBase
+	{acceleration}
 	{colors}
 	{decimalDigits}
 	{defaultValue}
 	{disabled}
 	{draggable}
 	{label}
+	{maxSpeed}
 	{onChange}
 	{param}
+	{rotationDegrees}
 	{snapThreshold}
 	{snapValues}
+	{step}
 	{style}
 	{unit}
+	{initialDelay}
 	bind:value
-	{rotationDegrees}
 >
-	{#snippet ui({ normalizedValue, handleTouchStart, handleMouseDown, handleDblClick })}
+	{#snippet ui({
+		normalizedValue,
+		handleTouchStart,
+		handleMouseDown,
+		handleDblClick,
+		handleKeyDown
+	})}
 		<svg
+			style="--stroke-width: {strokeWidth ?? lineWidth}px"
 			class={className}
 			role="slider"
 			tabindex="0"
@@ -115,29 +132,32 @@
 			viewBox="0 0 {size} {size}"
 			stroke-linecap="round"
 			stroke-linejoin="round"
-			stroke-width={lineWidth}
 			onmousedown={handleMouseDown}
 			ontouchstart={handleTouchStart}
 			ondblclick={handleDblClick}
+			onkeydown={handleKeyDown}
 		>
 			<circle cx={center} cy={center} r={circleRadius} fill={bgColor}></circle>
 			{#if snapValues.length > 0 || param.type === 'enum-param'}
 				<!-- Snap markers -->
-				<path d={drawSnapMarkers()} stroke={bgColor} />
+				<path d={drawSnapMarkers()} stroke={bgColor} stroke-width={strokeWidth ?? lineWidth} />
 			{/if}
 			<!-- Arcs -->
 			<path
+				class="line"
 				d={describeArc(center, center, arcRadius, $rotationDegrees, 135)}
-				fill="none"
 				stroke={bgColor}
+				fill="none"
 			/>
 			<path
+				class="line"
 				d={describeArc(center, center, arcRadius, -135, $rotationDegrees)}
-				fill="none"
 				stroke={arcColor2}
+				fill="none"
 			/>
 			<!-- Knob indicator -->
 			<line
+				class="line"
 				x1={center}
 				y1={center * 0.7}
 				x2={center}
@@ -148,3 +168,28 @@
 		</svg>
 	{/snippet}
 </KnobBase>
+
+<style>
+	svg {
+		outline: none;
+	}
+
+	.line {
+		transition: stroke-width 200ms;
+		stroke-width: var(--stroke-width);
+	}
+
+	.focus {
+		display: none;
+	}
+
+	svg:active .focus,
+	svg:focus .focus {
+		display: block;
+	}
+
+	svg:active .line,
+	svg:focus .line {
+		stroke-width: calc(var(--stroke-width) * 1.8);
+	}
+</style>

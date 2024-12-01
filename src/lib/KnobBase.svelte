@@ -7,8 +7,10 @@
 		handleTouchStart: (e: TouchEvent) => void;
 		handleMouseDown: ({ clientY }: MouseEvent) => void | boolean;
 		handleDblClick: () => void;
+		handleKeyDown: (e: KeyboardEvent) => void;
 	};
 
+	// TODO docs
 	export type SharedKnobProps = {
 		style?: string;
 		disabled?: boolean;
@@ -16,6 +18,15 @@
 		onChange?: (value: number | string) => void;
 		param: FloatParam | EnumParam<readonly string[]>;
 		value: number | string;
+
+		/** normalized value from 0.0 to 1.0 */
+		step?: number;
+		/** multiplier for acceleration */
+		acceleration?: number;
+		maxSpeed?: number;
+		/** initial delay before acceleration starts (ms) */
+		initialDelay?: number;
+
 		defaultValue?: number | string;
 		label?: string;
 		unit?: string;
@@ -45,13 +56,17 @@
 		unit = '',
 		onChange,
 		value = $bindable(),
+		step = 0.01,
+		acceleration = 1.4,
+		maxSpeed = 0.2,
+		initialDelay = 100,
 		defaultValue,
 		param,
 		rotationDegrees,
 		decimalDigits = 0,
 		snapValues = [],
 		snapThreshold = 0.1,
-		disabled = false,
+		disabled: isDisabled = false,
 		draggable = true,
 		colors = {}
 	}: KnobBaseProps = $props();
@@ -105,11 +120,11 @@
 
 	function handleMouseMove({ clientY }: MouseEvent) {
 		if (!draggable) return;
-		if (disabled) return;
+		if (isDisabled) return;
 		if (!isDragging) return;
 		const deltaY = startY - clientY;
 		const deltaValue = deltaY / 200;
-		setValue(clamp(startValue + deltaValue, 0, 1));
+		setValue(startValue + deltaValue);
 
 		return true;
 	}
@@ -125,11 +140,47 @@
 			(param as EnumParam<string[]>).variants?.[0];
 		if (val === undefined) return;
 
-		setValue(clamp(normalize(val, param), 0, 1));
+		setValue(normalize(val, param));
 	}
 
 	const handleTouchStart = toMobile(handleMouseDown);
 	const handleTouchMove = toMobile(handleMouseMove);
+
+	type Direction = 'left' | 'right';
+
+	let intervalId = -1;
+	let currentSpeed = step;
+
+	const directions: Record<string, Direction> = {
+		ArrowLeft: 'left',
+		ArrowDown: 'left',
+		ArrowRight: 'right',
+		ArrowUp: 'right'
+	};
+
+	function adjustValue(direction: Direction) {
+		const delta = direction === 'right' ? currentSpeed : -currentSpeed;
+		console.log(direction);
+		setValue(normalizedValue + delta);
+
+		currentSpeed = Math.min(maxSpeed, currentSpeed * acceleration);
+	}
+
+	function handleKeyDown(e: KeyboardEvent) {
+		if (isDisabled) return;
+		if (!(e.key in directions)) return;
+		if (intervalId > -1) return;
+
+		intervalId = window.setInterval(() => adjustValue(directions[e.key]), initialDelay);
+	}
+
+	function handleKeyUp() {
+		if (intervalId === -1) return;
+
+		window.clearInterval(intervalId);
+		intervalId = -1;
+		currentSpeed = step;
+	}
 
 	$effect(() => {
 		rotationDegrees.set(normalizedValue * 270 - 135);
@@ -151,7 +202,7 @@
 			return;
 		}
 
-		let newValue = unnormalizeToNumber(newNormalizedValue, param);
+		let newValue = unnormalizeToNumber(clamp(newNormalizedValue, 0, 1), param);
 
 		if (fixedSnapValues.length > 0) {
 			const nearestSnapValue = fixedSnapValues.reduce((prev, curr) => {
@@ -176,14 +227,20 @@
 	}
 </script>
 
-<svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} ontouchend={handleMouseUp} />
+<svelte:window
+	onmousemove={handleMouseMove}
+	onmouseup={handleMouseUp}
+	ontouchend={handleMouseUp}
+	onkeyup={handleKeyUp}
+/>
 
 <div class="container" {style}>
 	{@render ui?.({
 		normalizedValue,
 		handleTouchStart,
 		handleMouseDown,
-		handleDblClick
+		handleDblClick,
+		handleKeyDown
 	})}
 	{#if label}
 		<div class="label" style:background={bgColor}>{label}</div>

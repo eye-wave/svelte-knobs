@@ -23,6 +23,10 @@
 		unit = '',
 		onChange,
 		value = $bindable(),
+		step,
+		acceleration,
+		maxSpeed,
+		initialDelay,
 		defaultValue,
 		param,
 		stiffness = 0.5,
@@ -106,29 +110,43 @@
 </script>
 
 <KnobBase
+	{acceleration}
 	{colors}
 	{decimalDigits}
 	{defaultValue}
 	{disabled}
 	{draggable}
 	{label}
+	{maxSpeed}
 	{onChange}
 	{param}
 	{snapThreshold}
 	{snapValues}
+	{step}
 	{style}
 	{unit}
+	{initialDelay}
 	bind:value
 	{rotationDegrees}
 >
-	{#snippet ui({ handleTouchStart, handleMouseDown, handleDblClick })}
+	{#snippet ui({
+		handleTouchStart,
+		handleMouseDown,
+		handleDblClick,
+		handleKeyDown,
+		normalizedValue
+	})}
 		<canvas
+			role="slider"
+			tabindex="0"
+			aria-valuenow={normalizedValue}
 			bind:this={canvas}
 			{width}
 			{height}
 			class={className}
 			onmousedown={handleMouseDown}
 			ontouchstart={handleTouchStart}
+			onkeydown={handleKeyDown}
 			ondblclick={handleDblClick}
 			oncontextmenu={(e) => e.preventDefault()}
 			draggable={false}
@@ -136,3 +154,14 @@
 		</canvas>
 	{/snippet}
 </KnobBase>
+
+<style>
+	canvas {
+		outline: none;
+	}
+
+	canvas:active,
+	canvas:focus {
+		filter: drop-shadow(2px 0 2px currentColor);
+	}
+</style>

@@ -88,7 +88,7 @@
 	</div>
 
 	<div class="example">
-		<h2>Colors</h2>
+		<h2>Styling</h2>
 
 		<LazyComponent component={() => import('./examples/ColoredKnobs.svelte')} />
 

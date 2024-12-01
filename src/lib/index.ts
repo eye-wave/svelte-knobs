@@ -1,6 +1,6 @@
 // Reexport your entry components here
 export * from './params.js';
-import Knob from './Knob.svelte';
+import Knob from './SvgKnob.svelte';
 import VideoKnob, { cleanVideoKnobCache } from './VideoKnob.svelte';
 import ImageKnob from './ImageKnob.svelte';
 

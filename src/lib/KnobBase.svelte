@@ -24,8 +24,6 @@
 		/** multiplier for acceleration */
 		acceleration?: number;
 		maxSpeed?: number;
-		/** initial delay before acceleration starts (ms) */
-		initialDelay?: number;
 
 		defaultValue?: number | string;
 		label?: string;
@@ -43,9 +41,11 @@
 	import { clamp } from './helpers/clamp.js';
 	import { normalize, format, unnormalizeToString, unnormalizeToNumber } from './params.js';
 	import type { EnumParam, FloatParam } from './params.js';
+	import './shield.css';
 
 	type KnobBaseProps = {
 		ui: Snippet<[SnippetProps]>;
+		// FIX unwanted knob jiggle
 		rotationDegrees: Spring<number>;
 	} & SharedKnobProps;
 
@@ -57,9 +57,8 @@
 		onChange,
 		value = $bindable(),
 		step = 0.01,
-		acceleration = 1.4,
+		acceleration = 1.2,
 		maxSpeed = 0.2,
-		initialDelay = 100,
 		defaultValue,
 		param,
 		rotationDegrees,
@@ -77,8 +76,6 @@
 	let startY: number;
 	let startValue: number;
 
-	// This is needed in case some snap value is very close to the min or max range
-	// preventing the user from selecting that value
 	function completeFixedSnapValues(snapValues: number[]) {
 		if (param.type === 'enum-param') return [];
 		if (snapValues.length < 1) return [];
@@ -100,32 +97,26 @@
 	function toMobile(handler: ({ clientY }: MouseEvent) => void | boolean) {
 		return (event: TouchEvent) => {
 			const touch = event.touches?.[0];
-			if (touch === undefined) return;
-
+			if (!touch) return;
 			const clientY = touch.clientY;
-
 			// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 			handler({ clientY } as MouseEvent) && event.preventDefault();
 		};
 	}
 
 	function handleMouseDown({ clientY }: MouseEvent) {
-		if (!draggable) return;
+		if (!draggable || isDisabled) return;
 		isDragging = true;
 		startY = clientY;
 		startValue = normalizedValue;
-
 		return true;
 	}
 
 	function handleMouseMove({ clientY }: MouseEvent) {
-		if (!draggable) return;
-		if (isDisabled) return;
-		if (!isDragging) return;
+		if (!draggable || isDisabled || !isDragging) return;
 		const deltaY = startY - clientY;
 		const deltaValue = deltaY / 200;
 		setValue(startValue + deltaValue);
-
 		return true;
 	}
 
@@ -136,8 +127,9 @@
 	function handleDblClick() {
 		const val =
 			defaultValue ??
-			(param as FloatParam)?.range.min ??
+			(param as FloatParam)?.range?.min ??
 			(param as EnumParam<string[]>).variants?.[0];
+
 		if (val === undefined) return;
 
 		setValue(normalize(val, param));
@@ -148,7 +140,6 @@
 
 	type Direction = 'left' | 'right';
 
-	let intervalId = -1;
 	let currentSpeed = step;
 
 	const directions: Record<string, Direction> = {
@@ -158,52 +149,49 @@
 		ArrowUp: 'right'
 	};
 
-	function adjustValue(direction: Direction) {
-		const delta = direction === 'right' ? currentSpeed : -currentSpeed;
-		console.log(direction);
-		setValue(normalizedValue + delta);
+	function handleKeyDown(e: KeyboardEvent) {
+		if (isDisabled || !(e.key in directions)) return;
+		isDragging = true;
+		const direction = directions[e.key];
 
+		if (param.type === 'enum-param') {
+			const i = param.variants.findIndex((v) => v === value) ?? 0;
+			const step = direction === 'right' ? 1 : -1;
+
+			value = param.variants[clamp(i + step, 0, param.variants.length - 1)];
+			onChange?.(value);
+
+			return;
+		}
+
+		const delta = direction === 'right' ? currentSpeed : -currentSpeed;
+		setValue(normalizedValue + delta);
 		currentSpeed = Math.min(maxSpeed, currentSpeed * acceleration);
 	}
 
-	function handleKeyDown(e: KeyboardEvent) {
-		if (isDisabled) return;
-		if (!(e.key in directions)) return;
-		if (intervalId > -1) return;
-
-		intervalId = window.setInterval(() => adjustValue(directions[e.key]), initialDelay);
-	}
-
 	function handleKeyUp() {
-		if (intervalId === -1) return;
-
-		window.clearInterval(intervalId);
-		intervalId = -1;
+		isDragging = false;
 		currentSpeed = step;
 	}
 
 	$effect(() => {
 		rotationDegrees.set(normalizedValue * 270 - 135);
-
-		// this was easier in svelte 4 :/
 		window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
 		return () => window.removeEventListener('touchmove', handleTouchMove);
 	});
 
 	function setValue(newNormalizedValue: number) {
 		if (param.type === 'enum-param') {
-			const newValue = unnormalizeToString(newNormalizedValue, param);
-
+			const newValue = unnormalizeToString(clamp(newNormalizedValue, 0, 1), param);
 			if (value !== newValue) {
 				value = newValue;
 				onChange?.(value);
 			}
-
 			return;
 		}
 
 		let newValue = unnormalizeToNumber(clamp(newNormalizedValue, 0, 1), param);
-
 		if (fixedSnapValues.length > 0) {
 			const nearestSnapValue = fixedSnapValues.reduce((prev, curr) => {
 				const currNormalized = normalize(curr, param);
@@ -213,7 +201,6 @@
 					? curr
 					: prev;
 			});
-
 			const nearestSnapNormalized = normalize(nearestSnapValue, param);
 			if (Math.abs(nearestSnapNormalized - newNormalizedValue) <= snapThreshold) {
 				newValue = nearestSnapValue;
@@ -221,10 +208,27 @@
 		}
 
 		if (value !== newValue) {
+			if (isNaN(newValue)) {
+				newValue = 0;
+				console.warn('newValue is NaN');
+			}
 			value = newValue;
 			onChange?.(value);
 		}
 	}
+
+	let shield = document.createElement('div');
+
+	$effect(() => {
+		if (isDragging) {
+			shield.className = 'shield tf68Uh';
+			document.body.append(shield);
+			document.body.style.userSelect = 'none';
+		} else {
+			shield.remove();
+			document.body.style.userSelect = '';
+		}
+	});
 </script>
 
 <svelte:window
@@ -259,7 +263,6 @@
 	span {
 		user-select: none;
 	}
-
 	.container {
 		position: relative;
 		display: flex;

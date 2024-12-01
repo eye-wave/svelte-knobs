@@ -36,7 +36,6 @@
 		step,
 		acceleration,
 		maxSpeed,
-		initialDelay,
 		defaultValue,
 		param,
 		stiffness = 0.5,
@@ -51,12 +50,14 @@
 		colors = {}
 	}: Props = $props();
 
+	// TODO Refactor
 	const rotationDegrees = spring(normalize(value, param) * 270 - 135, { stiffness });
 	const frames: Array<HTMLImageElement> = [];
 
 	function draw() {
 		if (!ctx) return;
 
+		// TODO Refactor
 		const normalized = ($rotationDegrees + 135) / 270;
 		const i = Math.floor(normalized * numberOfFrames);
 		if (i < 0) return;
@@ -209,7 +210,6 @@
 	{defaultValue}
 	{disabled}
 	{draggable}
-	{initialDelay}
 	{label}
 	{maxSpeed}
 	{onChange}
@@ -230,6 +230,7 @@
 		normalizedValue
 	})}
 		<canvas
+			{style}
 			role="slider"
 			tabindex="0"
 			aria-valuenow={normalizedValue}

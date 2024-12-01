@@ -3,6 +3,7 @@
 	import { spring } from 'svelte/motion';
 	import KnobBase from './KnobBase.svelte';
 	import type { SharedKnobProps } from './KnobBase.svelte';
+	import './svgknob.css';
 
 	type Props = {
 		size?: number;
@@ -28,7 +29,6 @@
 		step,
 		acceleration,
 		maxSpeed,
-		initialDelay,
 		defaultValue,
 		param,
 		stiffness = 0.5,
@@ -109,9 +109,8 @@
 	{snapThreshold}
 	{snapValues}
 	{step}
-	{style}
 	{unit}
-	{initialDelay}
+	{style}
 	bind:value
 >
 	{#snippet ui({
@@ -122,16 +121,16 @@
 		handleKeyDown
 	})}
 		<svg
-			style="--stroke-width: {strokeWidth ?? lineWidth}px"
-			class={className}
-			role="slider"
-			tabindex="0"
-			aria-valuenow={normalizedValue}
+			style="--stroke-width:{strokeWidth ?? lineWidth}px;{style}"
+			class="dK3qx2 {className}"
 			width={size}
 			height={size}
 			viewBox="0 0 {size} {size}"
 			stroke-linecap="round"
 			stroke-linejoin="round"
+			role="slider"
+			tabindex="0"
+			aria-valuenow={normalizedValue}
 			onmousedown={handleMouseDown}
 			ontouchstart={handleTouchStart}
 			ondblclick={handleDblClick}
@@ -144,20 +143,20 @@
 			{/if}
 			<!-- Arcs -->
 			<path
-				class="line"
+				class="knob_line"
 				d={describeArc(center, center, arcRadius, $rotationDegrees, 135)}
 				stroke={bgColor}
 				fill="none"
 			/>
 			<path
-				class="line"
+				class="knob_line"
 				d={describeArc(center, center, arcRadius, -135, $rotationDegrees)}
 				stroke={arcColor2}
 				fill="none"
 			/>
 			<!-- Knob indicator -->
 			<line
-				class="line"
+				class="knob_line"
 				x1={center}
 				y1={center * 0.7}
 				x2={center}
@@ -168,28 +167,3 @@
 		</svg>
 	{/snippet}
 </KnobBase>
-
-<style>
-	svg {
-		outline: none;
-	}
-
-	.line {
-		transition: stroke-width 200ms;
-		stroke-width: var(--stroke-width);
-	}
-
-	.focus {
-		display: none;
-	}
-
-	svg:active .focus,
-	svg:focus .focus {
-		display: block;
-	}
-
-	svg:active .line,
-	svg:focus .line {
-		stroke-width: calc(var(--stroke-width) * 1.8);
-	}
-</style>

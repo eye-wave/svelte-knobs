@@ -1,0 +1,15 @@
+svg.dK3qx2 {
+	outline: none;
+}
+
+.knob_line {
+	transition: stroke-width 200ms;
+	stroke-width: var(--stroke-width);
+}
+
+svg.dK3qx2:hover .knob_line,
+svg.dK3qx2:focus .knob_line,
+svg.dK3qx2:focus-within .knob_line,
+svg.dK3qx2:active .knob_line {
+	stroke-width: calc(var(--stroke-width) * 1.8);
+}

@@ -25,8 +25,8 @@
 		disabled
 	/>
 
-	<Knob param={basicParam} value={24} label="Chubby" strokeWidth={6} colors={{ arc: '#ff3e00' }} />
-	<Knob param={basicParam} value={24} label="Elegant" strokeWidth={2} colors={{ arc: '#ff3e00' }} />
+	<Knob param={basicParam} value={24} label="Chubby" strokeWidth={6} colors={{ arc: '#3eff00' }} />
+	<Knob param={basicParam} value={24} label="Slim" strokeWidth={1} colors={{ arc: '#4e80ce' }} />
 </div>
 
 <style>

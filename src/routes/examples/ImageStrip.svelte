@@ -14,6 +14,7 @@
 	unit="%"
 	source={videoSource}
 	numberOfFrames={79}
+	stiffness={0.2}
 	cacheFrames
 />
 
@@ -23,5 +24,6 @@
 	label="Volume"
 	unit="%"
 	source={imageSource}
+	stiffness={0.2}
 	numberOfFrames={79}
 />

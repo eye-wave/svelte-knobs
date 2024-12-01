@@ -63,6 +63,7 @@
 		box-sizing: border-box;
 		border-radius: 8px;
 		overflow-x: scroll;
+		scrollbar-width: none;
 		padding: 1rem;
 	}
 

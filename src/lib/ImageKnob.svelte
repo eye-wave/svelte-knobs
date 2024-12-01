@@ -26,7 +26,6 @@
 		step,
 		acceleration,
 		maxSpeed,
-		initialDelay,
 		defaultValue,
 		param,
 		stiffness = 0.5,
@@ -40,7 +39,7 @@
 		colors = {}
 	}: Props = $props();
 
-	// TODO rewrite base knob logic
+	// TODO Refactor
 	const rotationDegrees = spring(normalize(value, param) * 270 - 135, { stiffness });
 
 	function draw() {
@@ -49,6 +48,7 @@
 		if (!image) return;
 		if (!('width' in image && 'height' in image)) return;
 
+		// TODO Refactor
 		const normalized = ($rotationDegrees + 135) / 270;
 		const i = Math.floor(normalized * numberOfFrames);
 		const y = image.width * i;
@@ -125,7 +125,6 @@
 	{step}
 	{style}
 	{unit}
-	{initialDelay}
 	bind:value
 	{rotationDegrees}
 >
@@ -137,6 +136,7 @@
 		normalizedValue
 	})}
 		<canvas
+			{style}
 			role="slider"
 			tabindex="0"
 			aria-valuenow={normalizedValue}

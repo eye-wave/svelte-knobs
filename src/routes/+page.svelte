@@ -161,7 +161,7 @@
 		</p>
 
 		<p>
-			For the video knob, you can enable the <code>cleanVideoKnobCache</code> parameter by setting
+			For the video knob, you can enable the <code>cacheFrames</code> parameter by setting
 			it to <code>true</code>, which will sped up initial load in later uses. Additionally, a
 			function called <code>cleanVideoKnobCache</code> is provided to clear the cache afterward.
 		</p>

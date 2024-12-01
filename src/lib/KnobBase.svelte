@@ -217,15 +217,17 @@
 		}
 	}
 
-	let shield = document.createElement('div');
+	let shield: HTMLDivElement | null = null;
 
 	$effect(() => {
 		if (isDragging) {
+			if (shield === null) shield = document.createElement('div');
+
 			shield.className = 'shield tf68Uh';
 			document.body.append(shield);
 			document.body.style.userSelect = 'none';
 		} else {
-			shield.remove();
+			shield?.remove();
 			document.body.style.userSelect = '';
 		}
 	});

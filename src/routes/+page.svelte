@@ -106,7 +106,7 @@
 		<LazyComponent component={() => import('./examples/ImageStrip.svelte')} />
 
 		<p>
-			You can also create interactive knobs with a image slice.<br />
+			You can also create interactive knobs with an image strip.<br />
 			There's 2 ways of doing that here.
 			<code>{'<ImageKnob />'}</code> and <code>{'<VideoKnob />'}</code>
 		</p>
@@ -122,7 +122,7 @@
 			<tbody>
 				<tr>
 					<td>file size</td>
-					<td>tiny (20K)</td>
+					<td>tiny (18K)</td>
 					<td>small - large (264K - 408K)</td>
 				</tr>
 				<tr>
@@ -134,6 +134,11 @@
 					<td>load time (mobile)</td>
 					<td>very slow (~5.2s)</td>
 					<td>fast (~395ms)</td>
+				</tr>
+				<tr>
+					<td>load time (from cache)</td>
+					<td>fast (~180ms)</td>
+					<td>-</td>
 				</tr>
 				<tr>
 					<td>initial responsiveness</td>
@@ -153,6 +158,12 @@
 		<p>
 			Also, try to always specify the <code>numberOfFrames</code> property, even though it's not required
 			for image knob. It will help calculate the frames better and avoid flickering.
+		</p>
+
+		<p>
+			For the video knob, you can enable the <code>cleanVideoKnobCache</code> parameter by setting
+			it to <code>true</code>, which will sped up initial load in later uses. Additionally, a
+			function called <code>cleanVideoKnobCache</code> is provided to clear the cache afterward.
 		</p>
 
 		<CopyPaste>%import('./examples/ImageStrip.svelte')%</CopyPaste>

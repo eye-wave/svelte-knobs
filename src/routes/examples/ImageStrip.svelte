@@ -14,6 +14,7 @@
 	unit="%"
 	source={videoSource}
 	numberOfFrames={79}
+	cacheFrames
 />
 
 <ImageKnob

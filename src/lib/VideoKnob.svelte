@@ -1,3 +1,12 @@
+<script lang="ts" module>
+	/**
+   Removes cache created by <VideoKnob /> component.
+  */
+	export async function cleanVideoKnobCache() {
+		await caches.delete('svelte-knobs/cache');
+	}
+</script>
+
 <script lang="ts">
 	import { normalize } from './params.js';
 	import { onMount } from 'svelte';
@@ -12,6 +21,7 @@
 		numberOfFrames: number;
 		width?: number;
 		height?: number;
+		cacheFrames?: boolean;
 	} & SharedKnobProps;
 
 	let {
@@ -33,6 +43,7 @@
 		height = 80,
 		disabled = false,
 		draggable = true,
+		cacheFrames = false,
 		colors = {}
 	}: Props = $props();
 
@@ -63,71 +74,115 @@
 		ctx?.fillText('Loading...', 0, canvas.height / 2);
 	});
 
-	onMount(() => {
-		if (!source) return;
+	async function loadImage(src: string) {
+		return new Promise<HTMLImageElement>((resolve, reject) => {
+			const image = new Image();
+			image.src = src;
+			image.onerror = reject;
+			image.onload = () => resolve(image);
+		});
+	}
 
-		frames.splice(0);
+	async function loadFromCache() {
+		const cache = await caches.open('svelte-knobs/cache');
 
+		let i = 0;
+		let hasReadCache = false;
+
+		while (i < numberOfFrames) {
+			const response = await cache.match(`${source}:${i}`);
+			if (!response) break;
+
+			const url = URL.createObjectURL(await response.blob());
+			const image = await loadImage(url);
+			frames.push(image);
+
+			if (i === 0) {
+				ctx?.clearRect(0, 0, canvas.width, canvas.height);
+				ctx?.drawImage(image, 0, 0);
+			}
+
+			if (i === numberOfFrames - 1) hasReadCache = true;
+			i++;
+		}
+
+		return hasReadCache;
+	}
+
+	async function decodeVideo() {
 		const video = document.createElement('video');
 		video.src = source;
 
-		video.onloadeddata = async () => {
-			if (video.duration === 0) throw Error('Video is empty');
-			duration = video.duration;
+		const decoderCanvas = document.createElement('canvas');
+		const dctx = decoderCanvas.getContext('2d');
+		if (!dctx) throw new Error('Failed to create canvas context');
 
-			const fps = duration / numberOfFrames;
-			const decoderCanvas = document.createElement('canvas');
-			const dctx = decoderCanvas.getContext('2d');
+		return new Promise<void>((resolve, reject) => {
+			video.onerror = reject;
+			video.onloadeddata = async () => {
+				if (video.duration === 0) throw new Error('Video is empty');
+				duration = video.duration;
+				const fps = video.duration / numberOfFrames;
+				decoderCanvas.width = width;
+				decoderCanvas.height = height;
 
-			decoderCanvas.width = width;
-			decoderCanvas.height = height;
+				let i = -1;
+				while (++i < numberOfFrames) {
+					video.currentTime = i * fps;
+					await new Promise((resolve) => video.requestVideoFrameCallback(resolve));
 
-			console.time('Decoding video');
+					dctx.clearRect(0, 0, decoderCanvas.width, decoderCanvas.height);
+					dctx.drawImage(video, 0, 0, decoderCanvas.width, decoderCanvas.height);
 
-			let i = -1;
+					const blob = await new Promise<Blob>((resolve, reject) => {
+						decoderCanvas.toBlob(
+							(blob) => (blob ? resolve(blob) : reject('Failed to create canvas blob')),
+							'image/webp'
+						);
+					});
 
-			async function decodeFrame() {
-				if (video.currentTime >= video.duration) return;
-				if (!dctx) throw Error('Failed to create canvas context');
+					const url = URL.createObjectURL(blob);
+					const image = await loadImage(url);
+					frames.push(image);
 
-				dctx.clearRect(0, 0, decoderCanvas.width, decoderCanvas.height);
-				dctx.drawImage(video, 0, 0, decoderCanvas.width, decoderCanvas.height);
+					if (i === 0) {
+						ctx?.clearRect(0, 0, canvas.width, canvas.height);
+						ctx?.drawImage(image, 0, 0);
+					}
 
-				return new Promise<void>((resolve, reject) => {
-					decoderCanvas.toBlob((blob) => {
-						if (!blob) return reject('Failed to create canvas blob');
+					const response = new Response(blob, { headers: { 'Content-Type': 'image/webp' } });
 
-						const url = URL.createObjectURL(blob);
-						const image = new Image();
+					if (cacheFrames) {
+						const cache = await caches.open('svelte-knobs/cache');
+						await cache.put(`${source}:${i}`, response);
+					}
+				}
 
-						image.src = url;
-						image.onerror = reject;
-						image.onload = () => {
-							if (i === 0) {
-								ctx?.clearRect(0, 0, canvas.width, canvas.height);
-								ctx?.drawImage(image, 0, 0);
-							}
+				resolve();
+			};
+		});
+	}
 
-							frames.push(image);
-							resolve();
-						};
-					}, 'image/webp');
-				});
+	// @ts-expect-error oops
+	onMount(async () => {
+		ctx = canvas.getContext('2d');
+		if (ctx) ctx.fillText('Loading...', 0, canvas.height / 2);
+
+		console.time('Decoding video');
+
+		if (cacheFrames) {
+			const hasReadCache = await loadFromCache();
+			if (hasReadCache) {
+				console.log('cache hit');
+				console.timeEnd('Decoding video');
+				return;
 			}
+		}
 
-			async function waitForFrame(video: HTMLVideoElement) {
-				return new Promise((resolve) => video.requestVideoFrameCallback(resolve));
-			}
+		frames.splice(0);
+		await decodeVideo();
 
-			while (i < numberOfFrames) {
-				video.currentTime = ++i * fps;
-
-				await waitForFrame(video);
-				await decodeFrame();
-			}
-
-			console.timeEnd('Decoding video');
-		};
+		console.timeEnd('Decoding video');
 
 		return () => {
 			for (const { src } of frames) {

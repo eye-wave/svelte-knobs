@@ -36,6 +36,7 @@
 		colors = {}
 	}: Props = $props();
 
+	// TODO rewrite base knob logic
 	const rotationDegrees = spring(normalize(value, param) * 270 - 135, { stiffness });
 
 	function draw() {

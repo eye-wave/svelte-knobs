@@ -1,169 +1,102 @@
-<script lang="ts">
-	import { normalize } from './params.js';
-	import { spring } from 'svelte/motion';
-	import KnobBase from './KnobBase.svelte';
-	import type { SharedKnobProps } from './KnobBase.svelte';
-	import './svgknob.css';
+<script lang="ts" module>
+	import type { DraggableProps } from './Draggable.svelte';
+	import { Spring, type Tween } from 'svelte/motion';
 
-	type Props = {
+	type Motion<T> = Spring<T> | Tween<T>;
+
+	export type SvgKnobProps = DraggableProps & {
+		/**
+		 * Size of the knob in pixels.
+		 * Default size is 80.
+		 */
 		size?: number;
-		stiffness?: number;
-		class?: string;
-		strokeWidth?: number;
-		colors?: {
-			arc?: string;
-			bg?: string;
-			disabled?: string;
-		};
-	} & SharedKnobProps;
 
-	let {
-		style,
-		strokeWidth,
-		class: className,
-		label = '',
-		unit = '',
-		size = 80,
-		onChange,
-		value = $bindable(),
-		step,
-		acceleration,
-		maxSpeed,
-		defaultValue,
-		param,
-		stiffness = 0.5,
-		decimalDigits = 0,
-		snapValues = [],
-		snapThreshold = 0.1,
-		disabled = false,
-		draggable = true,
-		colors = {}
-	}: Props = $props();
+		/**
+		 * "svelte/motion" class instance used to animate the knob.
+		 * Default motion in Spring with stiffness of 0.2
+		 */
+		motion?: Motion<number>;
 
-	const {
-		arc: arcColor = '#ae98db',
-		bg: bgColor = '#444',
-		disabled: disabledColor = '#777'
-	} = colors;
+		/**
+		 * Background color of the knob.
+		 * Default color is #333
+		 */
+		bgColor?: string;
 
-	const arcColor2 = $derived(disabled ? disabledColor : arcColor);
+		/**
+		 * Starting angle for the knob in degrees ( when the value is 0.0 ).
+		 * Default minAngle is -135
+		 */
+		minAngle?: number;
 
-	const rotationDegrees = spring(normalize(value, param) * 270 - 135, { stiffness });
-
-	const center = $derived(size / 2);
-	const arcRadius = $derived(size * 0.4);
-	const circleRadius = $derived(size * 0.32);
-	const lineWidth = $derived(size * 0.04);
-
-	function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number) {
-		const [sx, sy] = polarToCartesian(x, y, radius, endAngle);
-		const [ex, ey] = polarToCartesian(x, y, radius, startAngle);
-		const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-		return ['M', sx, sy, 'A', radius, radius, 0, largeArcFlag, 0, ex, ey].join(' ');
-	}
-
-	function polarToCartesian(
-		centerX: number,
-		centerY: number,
-		radius: number,
-		angleInDegrees: number
-	): [number, number] {
-		const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
-		return [
-			centerX + radius * Math.cos(angleInRadians),
-			centerY + radius * Math.sin(angleInRadians)
-		];
-	}
-
-	function drawSnapMarkers() {
-		if (param.type !== 'enum-param' && snapValues.length === 0) return null;
-
-		let paths = [];
-
-		const values = param.type === 'enum-param' ? param.variants : snapValues;
-		for (let snapValue of values) {
-			const normalizedSnapValue = normalize(snapValue, param);
-			const angle = normalizedSnapValue * 270 - 135;
-			const [x1, y1] = polarToCartesian(center, center, arcRadius, angle);
-			const [x2, y2] = polarToCartesian(center, center, size * 0.46, angle);
-
-			paths.push(`M ${x1} ${y1} L ${x2} ${y2}`);
-		}
-
-		return paths.join(' ');
-	}
+		/**
+		 * Ending angle for the knob in degrees ( when the value is 1.0 ).
+		 * Default maxAngle is 135
+		 */
+		maxAngle?: number;
+	};
 </script>
 
-<KnobBase
-	{acceleration}
-	{colors}
-	{decimalDigits}
-	{defaultValue}
-	{disabled}
-	{draggable}
-	{label}
-	{maxSpeed}
-	{onChange}
-	{param}
-	{rotationDegrees}
-	{snapThreshold}
-	{snapValues}
-	{step}
-	{unit}
-	{style}
-	bind:value
->
-	{#snippet ui({
-		normalizedValue,
-		handleTouchStart,
-		handleMouseDown,
-		handleDblClick,
-		handleKeyDown
-	})}
-		<svg
-			style="--stroke-width:{strokeWidth ?? lineWidth}px;{style}"
-			class="dK3qx2 {className}"
-			width={size}
-			height={size}
-			viewBox="0 0 {size} {size}"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			role="slider"
-			tabindex="0"
-			aria-valuenow={normalizedValue}
-			onmousedown={handleMouseDown}
-			ontouchstart={handleTouchStart}
-			ondblclick={handleDblClick}
-			onkeydown={handleKeyDown}
-		>
-			<circle cx={center} cy={center} r={circleRadius} fill={bgColor}></circle>
-			{#if snapValues.length > 0 || param.type === 'enum-param'}
-				<!-- Snap markers -->
-				<path d={drawSnapMarkers()} stroke={bgColor} stroke-width={strokeWidth ?? lineWidth} />
-			{/if}
-			<!-- Arcs -->
-			<path
-				class="knob_line"
-				d={describeArc(center, center, arcRadius, $rotationDegrees, 135)}
-				stroke={bgColor}
-				fill="none"
-			/>
-			<path
-				class="knob_line"
-				d={describeArc(center, center, arcRadius, -135, $rotationDegrees)}
-				stroke={arcColor2}
-				fill="none"
-			/>
-			<!-- Knob indicator -->
-			<line
-				class="knob_line"
-				x1={center}
-				y1={center * 0.7}
-				x2={center}
-				y2={center - circleRadius + 5}
-				stroke="currentColor"
-				transform="rotate({$rotationDegrees}, {center}, {center})"
-			/>
-		</svg>
-	{/snippet}
-</KnobBase>
+<script lang="ts">
+	import Draggable from './Draggable.svelte';
+	import type { SvelteHTMLElements } from 'svelte/elements';
+	import { describeArc, valueToAngle } from './arc.js';
+
+	type Props = SvelteHTMLElements['svg'] & SvgKnobProps;
+	let {
+		value = $bindable(0),
+		size = 80,
+		motion = new Spring(0.0, { stiffness: 0.2 }),
+		bgColor = '#222',
+		minAngle = -135,
+		maxAngle = 135,
+		step,
+		defaultValue,
+		...svgProps
+	}: Props = $props();
+
+	let center = $derived(size / 2);
+	let arcRadius = $derived(size * 0.4);
+	let circleRadius = $derived(size * 0.32);
+
+	$effect(() => {
+		motion.set(value);
+	});
+</script>
+
+<Draggable bind:value {step} {defaultValue}>
+	<svg
+		width="{size}px"
+		height="{size}px"
+		viewBox="0 0 {size} {size}"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		stroke-width={size * 0.06}
+		{...svgProps}
+	>
+		<circle cx={center} cy={center} r={circleRadius} fill={bgColor}></circle>
+		<!-- Arcs -->
+		<path
+			class="knob_line"
+			d={describeArc(center, center, arcRadius, 1.0, minAngle, maxAngle)}
+			stroke={bgColor}
+			fill="none"
+		/>
+		<path
+			class="knob_line"
+			d={describeArc(center, center, arcRadius, motion.current, minAngle, maxAngle)}
+			stroke="currentColor"
+			fill="none"
+		/>
+		<!-- Knob indicator -->
+		<line
+			class="knob_line"
+			x1={center}
+			y1={center * 0.7}
+			x2={center}
+			y2={center - circleRadius + 5}
+			stroke="currentColor"
+			transform="rotate({valueToAngle(motion.current, minAngle, maxAngle)}, {center}, {center})"
+		/>
+	</svg>
+</Draggable>

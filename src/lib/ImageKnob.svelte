@@ -1,167 +1,92 @@
-<script lang="ts">
-	import { normalize } from './params.js';
-	import { onMount } from 'svelte';
-	import { spring } from 'svelte/motion';
-	import KnobBase from './KnobBase.svelte';
-	import type { SharedKnobProps } from './KnobBase.svelte';
+<script lang="ts" module>
+	import type { DraggableProps } from './Draggable.svelte';
+	import { Spring, type Tween } from 'svelte/motion';
 
-	type Props = {
-		stiffness?: number;
-		class?: string;
-		source: string;
+	type Motion<T> = Spring<T> | Tween<T>;
+
+	export type ImageKnobProps = DraggableProps & {
+		/**
+		 * Source for the knob image strip.
+		 */
+		src: string;
+
+		/**
+		 * Number of animation frames in the image.
+		 * By default the component will try to guess.
+		 */
 		numberOfFrames?: number;
-		width?: number;
-		height?: number;
-	} & SharedKnobProps;
 
+		/**
+		 * Width of the image in pixels.
+		 * Default width is 80;
+		 */
+		width?: number;
+
+		/**
+		 * Height of the image in pixels.
+		 * Default height is 80;
+		 */
+		height?: number;
+
+		/**
+		 * "svelte/motion" class instance used to animate the knob.
+		 * Default motion in Spring with stiffness of 0.2
+		 */
+		motion?: Motion<number>;
+	};
+</script>
+
+<script lang="ts">
+	import Draggable from './Draggable.svelte';
+	import type { SvelteHTMLElements } from 'svelte/elements';
+	import { onMount } from 'svelte';
+
+	type Props = SvelteHTMLElements['div'] & ImageKnobProps;
 	let {
-		style,
-		source,
-		numberOfFrames = $bindable(),
-		class: className,
-		label = '',
-		unit = '',
-		onChange,
-		value = $bindable(),
-		step,
-		acceleration,
-		maxSpeed,
-		defaultValue,
-		param,
-		stiffness = 0.5,
-		decimalDigits = 0,
-		snapValues = [],
-		snapThreshold = 0.1,
+		value = $bindable(0),
 		width = 80,
 		height = 80,
-		disabled = false,
-		draggable = true,
-		colors = {}
+		numberOfFrames,
+		src,
+		motion = new Spring(0.0, { stiffness: 0.2 }),
+		...defaultProps
 	}: Props = $props();
 
-	// TODO Refactor
-	const rotationDegrees = spring(normalize(value, param) * 270 - 135, { stiffness });
-
-	function draw() {
-		if (!ctx) return;
-		if (!numberOfFrames) return;
-		if (!image) return;
-		if (!('width' in image && 'height' in image)) return;
-
-		// TODO Refactor
-		const normalized = ($rotationDegrees + 135) / 270;
-		const i = Math.floor(normalized * numberOfFrames);
-		const y = image.width * i;
-
-		if (i < 0) return;
-		if (y >= image.height) return;
-
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.drawImage(
-			image,
-			0, // sx
-			y, // sy
-			image.width, // sWidth
-			image.width, // sHeight
-			0, // dx
-			0, // dy
-			canvas.width, // dWidth
-			canvas.height // dHeight
-		);
-	}
-
 	onMount(() => {
-		ctx = canvas.getContext('2d');
-		ctx?.fillText('Loading...', 0, canvas.height / 2);
-	});
-
-	onMount(() => {
-		if (!source) return;
-
-		console.time('load image');
-
-		image = new Image();
-		image.src = source;
+		const image = new Image();
+		image.src = src;
 		image.onload = () => {
-			if (!image) throw Error('What');
-			if (numberOfFrames === undefined) {
-				if ('width' in image && 'height' in image) {
-					console.warn('Automatic estimation of numberOfFrames might be inaccurate');
-					numberOfFrames = Math.floor(image.height / image.width);
-				} else {
-					throw Error('Failed to estimate numberOfFrames');
-				}
+			if ('width' in image && 'height' in image) {
+				console.warn('Automatic estimation of numberOfFrames might be inaccurate');
+				numberOfFrames = Math.floor(image.height / image.width) - 1;
+			} else {
+				throw Error('Failed to estimate numberOfFrames');
 			}
-
-			console.timeEnd('load image');
-			isLoading = false;
 		};
 	});
 
-	$effect(() => {
-		if (isLoading) return;
-		draw();
-	});
+	let transform = $derived(Math.floor(motion.current * (numberOfFrames ?? 0)));
 
-	let canvas: HTMLCanvasElement;
-	let ctx: CanvasRenderingContext2D | null = null;
-	let isLoading = $state(true);
-	let image: HTMLImageElement | null = null;
+	$effect(() => {
+		motion.set(value);
+	});
 </script>
 
-<KnobBase
-	{acceleration}
-	{colors}
-	{decimalDigits}
-	{defaultValue}
-	{disabled}
-	{draggable}
-	{label}
-	{maxSpeed}
-	{onChange}
-	{param}
-	{snapThreshold}
-	{snapValues}
-	{step}
-	{style}
-	{unit}
+<Draggable
 	bind:value
-	{rotationDegrees}
+	style="width:{width}px;height:{height}px;{defaultProps.style}"
+	{...defaultProps}
 >
-	{#snippet ui({
-		handleTouchStart,
-		handleMouseDown,
-		handleDblClick,
-		handleKeyDown,
-		normalizedValue
-	})}
-		<canvas
-			{style}
-			role="slider"
-			tabindex="0"
-			aria-valuenow={normalizedValue}
-			bind:this={canvas}
-			{width}
-			{height}
-			class={className}
-			onmousedown={handleMouseDown}
-			ontouchstart={handleTouchStart}
-			onkeydown={handleKeyDown}
-			ondblclick={handleDblClick}
-			oncontextmenu={(e) => e.preventDefault()}
-			draggable={false}
-		>
-		</canvas>
-	{/snippet}
-</KnobBase>
+	<div
+		style:background-image="url({src})"
+		style:background-position="0 {-transform * height}px"
+	></div>
+</Draggable>
 
 <style>
-	canvas {
-		outline: none;
-	}
-
-	canvas:active,
-	canvas:focus {
-		filter: drop-shadow(2px 0 2px currentColor);
+	div {
+		position: relative;
+		width: 100%;
+		height: 100%;
 	}
 </style>

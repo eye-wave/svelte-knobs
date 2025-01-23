@@ -7,11 +7,20 @@
 		 */
 		value?: number;
 
+		weight?: number;
+
 		/**
 		 * The increment or decrement value for keyboard interactions.
 		 * Defaults to `0.1` if not specified.
 		 */
 		step?: number;
+
+		/**
+		 * Optional: specific values the knob will snap to.
+		 */
+		snapPoints?: Array<number>;
+
+		snapThreshold?: number;
 
 		/**
 		 * Initial value for the component.
@@ -37,20 +46,36 @@
 	let {
 		value = $bindable(0.5),
 		children,
-		disabled: isDisabled,
-		defaultValue = 0.5,
+		disabled: isDisabled = false,
+		defaultValue,
 		step = 0.1,
+		snapPoints,
+		snapThreshold = 0.08,
+		weight = 200,
 		...divProps
 	}: Props = $props();
 
 	type SvelteEvent = { currentTarget: EventTarget & HTMLDivElement };
 
 	let isDragging = $state(false);
+	let isShieldOn = $state(false);
 	let startX: number;
 	let startY: number;
 	let startValue: number;
 
 	const isBrowser = typeof window === 'object';
+
+	function snap(value: number, snapPoints?: Array<number>) {
+		if (!snapPoints?.length) return value;
+		for (const point of snapPoints) {
+			const diff = Math.abs(point - value);
+			if (diff < snapThreshold) {
+				return point;
+			}
+		}
+
+		return value;
+	}
 
 	function toMobile(handler: ({ clientY }: MouseEvent & SvelteEvent) => void | boolean) {
 		return (event: TouchEvent) => {
@@ -76,15 +101,18 @@
 	}
 
 	const pickHigherDelta = (dx: number, dy: number) => (Math.abs(dy) < Math.abs(dx) ? dx : dy);
-	function handleMouseMove({ clientY, clientX }: MouseEvent) {
+	function handleMouseMove({ clientY, clientX, altKey }: MouseEvent) {
 		if (isDisabled || !isDragging) return;
+		isShieldOn = true;
+
 		const dy = startY - clientY;
 		const dx = startX - clientX;
 
 		const delta = pickHigherDelta(-dx, dy);
-		const deltaValue = delta / 200;
+		const deltaValue = delta / weight;
 
-		value = clamp(startValue + deltaValue, 0.0, 1.0);
+		if (!altKey && snapPoints) value = clamp(snap(startValue + deltaValue, snapPoints));
+		else value = clamp(startValue + deltaValue);
 
 		return true;
 	}
@@ -96,17 +124,18 @@
 		e.preventDefault();
 		const delta = e.deltaY > 0 ? -1.0 : 1.0;
 
-		value = clamp(value + delta * step, 0.0, 1.0);
+		value = clamp(snap(value + delta * step, snapPoints));
 	}
 
 	function handleMouseUp() {
 		isDragging = false;
+		isShieldOn = false;
 	}
 
 	function handleDblClick(e: MouseEvent & SvelteEvent) {
 		divProps?.ondblclick?.(e);
 		if (isDisabled) return;
-		value = defaultValue;
+		if (defaultValue) value = defaultValue;
 	}
 
 	function handleKeyDown(e: KeyboardEvent & SvelteEvent) {
@@ -119,7 +148,7 @@
 		const isPointingRight = e.key === 'ArrowRight' || e.key === 'ArrowUp';
 
 		value += +isPointingRight * step - +isPointingLeft * step;
-		value = clamp(value, 0.0, 1.0);
+		value = clamp(value);
 	}
 
 	const handleTouchStart = toMobile(handleMouseDown);
@@ -135,7 +164,7 @@
 	});
 
 	$effect(() => {
-		if (isDragging) {
+		if (isShieldOn) {
 			if (shield === null) shield = document.createElement('div');
 
 			shield.className = styles.shield;
@@ -153,16 +182,15 @@
 <div
 	class={divProps.class}
 	style={divProps.style}
-	{...divProps}
 	role="slider"
 	aria-valuenow={divProps['aria-valuenow']}
 	tabindex="0"
 	draggable={false}
-	onwheel={handleWheel}
 	ondblclick={handleDblClick}
+	onkeydown={handleKeyDown}
 	onmousedown={handleMouseDown}
 	ontouchstart={handleTouchStart}
-	onkeydown={handleKeyDown}
+	onwheel={handleWheel}
 >
 	{@render children?.()}
 </div>

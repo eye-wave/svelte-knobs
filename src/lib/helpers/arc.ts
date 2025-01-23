@@ -15,8 +15,8 @@ export function describeArc(
 	cy: number,
 	radius: number,
 	value: number,
-	minAngle: number,
-	maxAngle: number
+	minAngle = -135,
+	maxAngle = 135
 ) {
 	const endAngle = valueToAngle(value, minAngle, maxAngle);
 
@@ -27,5 +27,5 @@ export function describeArc(
 }
 
 export function valueToAngle(value: number, minAngle: number, maxAngle: number) {
-	return (maxAngle - minAngle) * clamp(value, 0.0, 1.0) + minAngle;
+	return (maxAngle - minAngle) * clamp(value) + minAngle;
 }

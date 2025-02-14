@@ -1,10 +1,12 @@
 <script lang="ts">
 	import CopyPaste from './CopyPaste.svelte';
 	import LazyComponent from './LazyComponent.svelte';
+
+	import { PUBLIC_VERSION } from '$env/static/public';
 </script>
 
 <div class="grid">
-	<h1 class="example"># svelte-knobs</h1>
+	<h1 class="example"># svelte-knobs {PUBLIC_VERSION}</h1>
 
 	<div class="example">
 		<h2>Basic</h2>

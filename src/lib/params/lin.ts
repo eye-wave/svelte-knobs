@@ -1,13 +1,11 @@
 import { Param } from './base.js';
 
 export class LinearParam extends Param<number> {
-	public min = 0.0;
-	public max = 1.0;
-
-	constructor(min?: number, max?: number) {
+	constructor(
+		public min = 0.0,
+		public max = 1.0
+	) {
 		super();
-		if (min) this.min = min;
-		if (max) this.max = max;
 	}
 
 	public normalize(value: number): number {

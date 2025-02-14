@@ -77,7 +77,16 @@
 
 	type SvelteEvent = { currentTarget: EventTarget & HTMLDivElement };
 
-	let snapPoints = $derived(_snapPoints?.toSorted((a, b) => a - b));
+	// Sort snap points and add 0 and 1 to beginning and end of the list
+	let snapPoints = $derived.by(() => {
+		if (_snapPoints === undefined) return;
+
+		const sorted = _snapPoints.filter((n) => n >= 0.0 && n <= 1.0).toSorted((a, b) => a - b);
+		if (sorted[0] !== 0.0) sorted.unshift(0.0);
+		if (sorted[sorted.length - 1] !== 1.0) sorted.push(1.0);
+
+		return sorted;
+	});
 
 	let isDragging = false;
 	let isShieldOn = $state(false);

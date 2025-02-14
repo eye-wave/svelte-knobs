@@ -47,12 +47,31 @@
 	</div>
 
 	<div class="example">
+		<h2>Snap points</h2>
+
+		<LazyComponent component={() => import('./examples/SnapPoints.svelte')} />
+
+		<p>
+			You can specify snap points and how strong the snapping is for your knob. The knob will
+			automatically sort and insert 0 and 1 to your snap point list, so <code>[0.6,0.3]</code> will
+			become <code>[0.0,0.3,0.6,1.0]</code>.
+		</p>
+		<p>
+			When snapPoints are specified, arrow keys on the keyboard will make the knob jump between
+			them. Pressing alt key will disable the snapping.
+		</p>
+		<p>This concept will be importand later in the next example.</p>
+
+		<CopyPaste>%import('./examples/SnapPoints.svelte')%</CopyPaste>
+	</div>
+
+	<div class="example">
 		<h2>Enum-param knobs</h2>
 
 		<LazyComponent component={() => import('./examples/EnumParam.svelte')} />
 
 		<p>
-			Enums or, in typescript realm <code>readonly string[]</code> parameter are a special type of
+			Enums, or in typescript realm <code>readonly string[]</code> parameter are a special type of
 			parameter that don't denormalize into a number, instead into a string. <code>EnumParam</code> class
 			comes with helpful properties for knob ui with already calcualted snap points and snap threshold
 			to make value changes 'instant'.

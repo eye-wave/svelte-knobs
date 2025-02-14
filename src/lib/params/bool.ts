@@ -7,13 +7,11 @@ export class BoolParam extends Param<boolean> {
 
 	public readonly snapPoints = [0.0, 1.0];
 	public readonly snapThreshold = 0.5;
-	public readonly step = 1.0;
 
 	public get knobProps() {
 		return {
 			snapPoints: this.snapPoints,
-			snapThreshold: this.snapThreshold,
-			step: this.step
+			snapThreshold: this.snapThreshold
 		};
 	}
 

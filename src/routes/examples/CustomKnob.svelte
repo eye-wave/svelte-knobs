@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { valueToAngle, Draggable } from '$lib';
 
-	let value = $state(0);
-	let angle = $derived(valueToAngle(value, -135, 135));
+	let valueSmoothed = $state(0.5);
+	let angle = $derived(valueToAngle(valueSmoothed, -135, 135));
 </script>
 
-<Draggable bind:value>
+<Draggable bind:valueSmoothed>
 	<div class="knob">
-		<div class="glow" style="filter: blur({value * 5}px);transform: scale({value})"></div>
+		<div
+			class="glow"
+			style="filter: blur({valueSmoothed * 5}px);transform: scale({valueSmoothed})"
+		></div>
 		<div class="thumb" style="transform: rotate({angle}deg) translateY(-10px)"></div>
-		<span>{value.toFixed(2)}</span>
+		<span>{valueSmoothed.toFixed(2)}</span>
 	</div>
 </Draggable>
 

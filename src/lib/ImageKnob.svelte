@@ -1,8 +1,5 @@
 <script lang="ts" module>
 	import type { DraggableProps } from './Draggable.svelte';
-	import { Spring, type Tween } from 'svelte/motion';
-
-	type Motion<T> = Spring<T> | Tween<T>;
 
 	export type ImageKnobProps = DraggableProps & {
 		/**
@@ -27,28 +24,22 @@
 		 * Default height is 80;
 		 */
 		height?: number;
-
-		/**
-		 * "svelte/motion" class instance used to animate the knob.
-		 * Default motion in Spring with stiffness of 0.2
-		 */
-		motion?: Motion<number>;
 	};
 </script>
 
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Draggable from './Draggable.svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
-	import { onMount } from 'svelte';
 
 	type Props = SvelteHTMLElements['div'] & ImageKnobProps;
 	let {
-		value = $bindable(0),
+		value = $bindable(0.5),
+		valueSmoothed = $bindable(0.5),
 		width = 80,
 		height = 80,
 		numberOfFrames,
 		src,
-		motion = new Spring(0.0, { stiffness: 0.5 }),
 		...defaultProps
 	}: Props = $props();
 
@@ -65,15 +56,12 @@
 		};
 	});
 
-	let transform = $derived(Math.floor(motion.current * (numberOfFrames ?? 0)));
-
-	$effect(() => {
-		motion.set(value);
-	});
+	let transform = $derived(Math.floor(valueSmoothed * (numberOfFrames ?? 0)));
 </script>
 
 <Draggable
 	bind:value
+	bind:valueSmoothed
 	style="width:{width}px;height:{height}px;{defaultProps.style}"
 	{...defaultProps}
 >

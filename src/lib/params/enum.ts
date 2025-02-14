@@ -15,16 +15,10 @@ export class EnumParam<T extends readonly string[]> extends Param<T[number]> {
 		return 1.0 / (this.#variants.length - 1.0);
 	}
 
-	public get step() {
-		const error = Math.pow(10, -this.#variants.length);
-		return this.snapThreshold + error;
-	}
-
 	public get knobProps() {
 		return {
 			snapPoints: this.snapPoints,
-			snapThreshold: this.snapThreshold,
-			step: this.step
+			snapThreshold: this.snapThreshold
 		};
 	}
 

@@ -1,4 +1,8 @@
 <script lang="ts" module>
+	import { Spring, type Tween } from 'svelte/motion';
+
+	type Motion<T> = Spring<T> | Tween<T>;
+
 	let shield: HTMLDivElement | null = null;
 
 	export type DraggableProps = {
@@ -7,11 +11,16 @@
 		 */
 		value?: number;
 
+		/**
+		 * Readonly smoothed value
+		 */
+		valueSmoothed?: number;
+
 		weight?: number;
 
 		/**
 		 * The increment or decrement value for keyboard interactions.
-		 * Defaults to `0.1` if not specified.
+		 * Defaults to `0.05` if not specified.
 		 */
 		step?: number;
 
@@ -21,6 +30,14 @@
 		snapPoints?: Array<number>;
 
 		snapThreshold?: number;
+
+		invertWheel?: boolean;
+
+		/**
+		 * "svelte/motion" class instance used to animate the knob.
+		 * Default motion in Spring with stiffness of 0.3
+		 */
+		motion?: Motion<number>;
 
 		/**
 		 * Initial value for the component.
@@ -45,11 +62,14 @@
 
 	let {
 		value = $bindable(0.5),
+		valueSmoothed = $bindable(0.5),
 		children,
 		disabled: isDisabled = false,
 		defaultValue,
-		step = 0.1,
-		snapPoints,
+		invertWheel = false,
+		step = 0.05,
+		snapPoints: _snapPoints,
+		motion = new Spring(0.5, { stiffness: 0.3 }),
 		snapThreshold = 0.08,
 		weight = 200,
 		...divProps
@@ -57,7 +77,9 @@
 
 	type SvelteEvent = { currentTarget: EventTarget & HTMLDivElement };
 
-	let isDragging = $state(false);
+	let snapPoints = $derived(_snapPoints?.toSorted((a, b) => a - b));
+
+	let isDragging = false;
 	let isShieldOn = $state(false);
 	let startX: number;
 	let startY: number;
@@ -82,8 +104,9 @@
 			const touch = event.touches?.[0];
 			if (!touch) return;
 			const clientY = touch.clientY;
+			const clientX = touch.clientX;
 			// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-			handler({ clientY } as MouseEvent & SvelteEvent) && event.preventDefault();
+			handler({ clientY, clientX } as MouseEvent & SvelteEvent) && event.preventDefault();
 		};
 	}
 
@@ -131,7 +154,8 @@
 
 		if (isDisabled) return;
 		e.preventDefault();
-		const delta = e.deltaY > 0 ? -1.0 : 1.0;
+
+		const delta = (e.deltaY > 0 ? 1.0 : -1.0) * (invertWheel ? -1.0 : 1.0);
 
 		value = clamp(snap(value + delta * step, snapPoints));
 	}
@@ -158,7 +182,19 @@
 
 		if (isPointingLeft || isPointingRight) e.preventDefault();
 
-		value += +isPointingRight * step - +isPointingLeft * step;
+		if (!e.altKey && snapPoints) {
+			let next = snapPoints.findIndex((n) => n >= value);
+
+			next += +isPointingRight;
+			next -= +isPointingLeft;
+
+			next = clamp(next, 0, snapPoints.length - 1);
+
+			value = snapPoints[next];
+		} else {
+			value += +isPointingRight * step - +isPointingLeft * step;
+		}
+
 		value = clamp(value);
 	}
 
@@ -186,11 +222,20 @@
 			document.body.style.userSelect = '';
 		}
 	});
+
+	$effect(() => {
+		motion.set(value);
+	});
+
+	$effect(() => {
+		valueSmoothed = motion.current;
+	});
 </script>
 
 <svelte:window onmousemove={handleMouseMove} onmouseup={handleMouseUp} ontouchend={handleMouseUp} />
 
 <div
+	aria-disabled={isDisabled}
 	class={divProps.class}
 	style={divProps.style}
 	role="slider"
@@ -209,5 +254,10 @@
 <style>
 	div {
 		width: fit-content;
+		cursor: grab;
+	}
+
+	div[aria-disabled='true'] {
+		cursor: auto;
 	}
 </style>

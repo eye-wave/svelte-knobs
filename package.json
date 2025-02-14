@@ -1,7 +1,7 @@
 {
 	"name": "svelte-knobs",
 	"description": "Svelte component library for building customizable knob controls.",
-	"version": "1.0.0-beta.0",
+	"version": "1.0.0-beta.1",
 	"repository": {
 		"url": "https://github.com/eye-wave/svelte-knobs"
 	},
@@ -26,6 +26,10 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"svelte": "./dist/index.js"
+		},
+		"./params": {
+			"types": "./dist/params.d.ts",
+			"import": "./dist/params.js"
 		}
 	},
 	"sideEffects": [

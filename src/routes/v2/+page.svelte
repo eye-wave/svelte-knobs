@@ -12,9 +12,9 @@
 </script>
 
 <main>
-  <Draggable bind:value>
-    <div style="user-select: none">{value.toFixed(2)}</div>
-  </Draggable>
+	<Draggable bind:value>
+		<div style="user-select: none">{value.toFixed(2)}</div>
+	</Draggable>
 
 	<SvgKnob bind:value />
 	<ImageKnob bind:value src={imageSource} width={90} height={90} />

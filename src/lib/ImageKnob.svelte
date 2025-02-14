@@ -48,7 +48,7 @@
 		height = 80,
 		numberOfFrames,
 		src,
-		motion = new Spring(0.0, { stiffness: 0.2 }),
+		motion = new Spring(0.0, { stiffness: 0.5 }),
 		...defaultProps
 	}: Props = $props();
 

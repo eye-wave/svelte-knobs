@@ -100,15 +100,24 @@
 		return true;
 	}
 
-	const pickHigherDelta = (dx: number, dy: number) => (Math.abs(dy) < Math.abs(dx) ? dx : dy);
+	let isMovingVertical = true;
+
 	function handleMouseMove({ clientY, clientX, altKey }: MouseEvent) {
 		if (isDisabled || !isDragging) return;
 		isShieldOn = true;
 
 		const dy = startY - clientY;
-		const dx = startX - clientX;
+		const dx = -(startX - clientX);
 
-		const delta = pickHigherDelta(-dx, dy);
+		const imv = Math.abs(dx) > Math.abs(dy);
+		if (imv !== isMovingVertical) {
+			startX = clientX;
+			startY = clientY;
+		}
+
+		isMovingVertical = imv;
+
+		const delta = isMovingVertical ? dx : dy;
 		const deltaValue = delta / weight;
 
 		if (!altKey && snapPoints) value = clamp(snap(startValue + deltaValue, snapPoints));
@@ -146,6 +155,8 @@
 
 		const isPointingLeft = e.key === 'ArrowLeft' || e.key === 'ArrowDown';
 		const isPointingRight = e.key === 'ArrowRight' || e.key === 'ArrowUp';
+
+		if (isPointingLeft || isPointingRight) e.preventDefault();
 
 		value += +isPointingRight * step - +isPointingLeft * step;
 		value = clamp(value);

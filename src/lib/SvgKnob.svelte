@@ -30,6 +30,12 @@
 		bgColor?: string;
 
 		/**
+		 * Disabled color for the knob.
+		 * Default color is #777
+		 */
+		disabledColor?: string;
+
+		/**
 		 * Starting angle for the knob in degrees ( when the value is 0.0 ).
 		 * Default minAngle is -135
 		 */
@@ -53,7 +59,8 @@
 		value = $bindable(0),
 		size = 80,
 		motion = new Spring(0.0, { stiffness: 0.5 }),
-		bgColor = '#222',
+		bgColor = '#333',
+		disabledColor = '#777',
 		minAngle = -135,
 		maxAngle = 135,
 		snapPointLength = 0.44,
@@ -81,7 +88,7 @@
 	});
 </script>
 
-<Draggable bind:value {...draggableProps}>
+<Draggable bind:value {...draggableProps} disabled={isDisabled}>
 	<svg
 		width="{size}px"
 		height="{size}px"
@@ -102,7 +109,7 @@
 		<path
 			class="knob_line"
 			d={describeArc(c, c, arcRadius, motion.current, minAngle, maxAngle)}
-			stroke="currentColor"
+			stroke={isDisabled ? disabledColor : 'currentColor'}
 			fill="none"
 		/>
 		<!-- Knob indicator -->
@@ -131,5 +138,12 @@
 		circleRadius * 0.8 - pointerLength * size * 0.52,
 		valueToAngle(motion.current, minAngle, maxAngle)
 	)}
-	<line class="knob_line" {x1} {y1} {x2} {y2} stroke="currentColor" />
+	<line
+		class="knob_line"
+		{x1}
+		{y1}
+		{x2}
+		{y2}
+		stroke={isDisabled ? disabledColor : 'currentColor'}
+	/>
 {/snippet}

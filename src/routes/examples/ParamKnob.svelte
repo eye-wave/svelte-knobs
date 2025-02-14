@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LinearParam, LogParam } from '$lib/params';
-	import SvgKnob from '$lib/SvgKnob.svelte';
+	import { SvgKnob } from '$lib';
 
 	let value = $state(0.0);
 

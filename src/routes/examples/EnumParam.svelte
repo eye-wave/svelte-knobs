@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { BoolParam, EnumParam } from '$lib/params';
-	import SvgKnob from '$lib/SvgKnob.svelte';
+	import { SvgKnob } from '$lib';
 
 	let value = $state(0);
 
@@ -22,7 +22,6 @@
 	bind:value
 	snapPoints={fruitParam.snapPoints}
 	snapThreshold={fruitParam.snapThreshold}
-	step={fruitParam.step}
 />
 <p>{fruitParam.denormalize(value)}</p>
 

@@ -57,11 +57,11 @@ export class LogParam extends Param<number> {
 		this.max = max;
 	}
 
-	normalize(value: number): number {
+	public normalize(value: number): number {
 		return (this.#log(value) - this.#logMin) / (this.#logMax - this.#logMin);
 	}
 
-	denormalize(value: number): number {
+	public denormalize(value: number): number {
 		return this.#exp(value * (this.#logMax - this.#logMin) + this.#logMin);
 	}
 }

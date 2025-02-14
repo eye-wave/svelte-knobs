@@ -22,8 +22,8 @@ describe('EnumParam', () => {
 	});
 
 	it('should handle values near boundaries correctly', () => {
-		expect(param.denormalize(0.49)).toBe('red');
-		expect(param.denormalize(0.51)).toBe('green');
+		expect(param.denormalize(0.24)).toBe('red');
+		expect(param.denormalize(0.74)).toBe('green');
 	});
 
 	it('should throw an error for invalid input in normalize', () => {

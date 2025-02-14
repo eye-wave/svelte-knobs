@@ -1,8 +1,8 @@
 import { Param } from './base.js';
 
 export class LinearParam extends Param<number> {
-	min = 0.0;
-	max = 1.0;
+	public min = 0.0;
+	public max = 1.0;
 
 	constructor(min?: number, max?: number) {
 		super();

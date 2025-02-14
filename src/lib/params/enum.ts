@@ -3,43 +3,56 @@ import { Param } from './base.js';
 
 export type VariantsOf<T> = T extends EnumParam<infer U> ? U[number] : never;
 export class EnumParam<T extends readonly string[]> extends Param<T[number]> {
-	private variants: T;
-	private dictionary: Record<T[number], number>;
-	private dictSize: number;
+	#variants: T;
+	#dictionary: Record<T[number], number>;
+	#dictSize: number;
 
-	get snapPoints(): number[] {
-		return this.variants.map((v) => this.normalize(v));
+	public get snapPoints(): number[] {
+		return this.#variants.map((v) => this.normalize(v));
 	}
 
-	get snapThreshold(): number {
-		return 1.0 / (this.variants.length - 1.0);
+	public get snapThreshold(): number {
+		return 1.0 / (this.#variants.length - 1.0);
+	}
+
+	public get step() {
+		const error = Math.pow(10, -this.#variants.length);
+		return this.snapThreshold + error;
+	}
+
+	public get knobProps() {
+		return {
+			snapPoints: this.snapPoints,
+			snapThreshold: this.snapThreshold,
+			step: this.step
+		};
 	}
 
 	constructor(variants: T) {
 		super();
 
-		this.variants = variants;
-		this.dictionary = {} as Record<T[number], number>;
-		this.dictSize = variants.length;
+		this.#variants = variants;
+		this.#dictionary = {} as Record<T[number], number>;
+		this.#dictSize = variants.length;
 
 		for (let i = 0; i < variants.length; i++) {
 			const name: T[number] = variants[i];
 
-			this.dictionary[name] = i;
+			this.#dictionary[name] = i;
 		}
 	}
 
 	public normalize(value: T[number]): number {
-		const index = this.dictionary[value];
+		const index = this.#dictionary[value];
 		if (index === undefined) throw new Error(`Value "${value}" is not a valid variant.`);
 
-		return index / (this.dictSize - 1);
+		return index / (this.#dictSize - 1);
 	}
 
 	public denormalize(value: number): T[number] {
 		const clampedValue = clamp(value, 0.0, 1.0);
-		const index = Math.floor(clampedValue * (this.dictSize - 1));
+		const index = Math.round(clampedValue * (this.#dictSize - 1));
 
-		return this.variants[index];
+		return this.#variants[index];
 	}
 }

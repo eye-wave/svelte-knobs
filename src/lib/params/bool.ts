@@ -5,6 +5,18 @@ export class BoolParam extends Param<boolean> {
 		super();
 	}
 
+	public readonly snapPoints = [0.0, 1.0];
+	public readonly snapThreshold = 0.5;
+	public readonly step = 1.0;
+
+	public get knobProps() {
+		return {
+			snapPoints: this.snapPoints,
+			snapThreshold: this.snapThreshold,
+			step: this.step
+		};
+	}
+
 	public normalize(value: boolean): number {
 		return value ? 1.0 : 0.0;
 	}

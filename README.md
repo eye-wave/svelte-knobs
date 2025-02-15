@@ -18,7 +18,7 @@ Inspired by:
 Add the library to your project:
 
 ```bash
-npm install svelte-knobs
+npm install svelte-knobs@1.0.0-beta.1
 ```
 
 ## Usage
